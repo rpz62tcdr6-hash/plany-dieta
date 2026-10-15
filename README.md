@@ -1,4 +1,4 @@
-# Plany i Diety 💪
+# Plany & Diety 💪
 
 Aplikacja dla trenera personalnego do tworzenia **planów treningowych** i **diet** dla podopiecznych.
 
@@ -6,9 +6,12 @@ Aplikacja dla trenera personalnego do tworzenia **planów treningowych** i **die
 
 - **Podopieczni** – dane (płeć, wiek, wzrost, waga, aktywność, cel, notatki) i automatyczne
   wyliczenie zapotrzebowania kalorycznego (BMR, TDEE, cel kcal, proponowane makro).
-- **Plany treningowe** – dni treningowe, ćwiczenia z bazy, serie, powtórzenia, ciężar, przerwa, uwagi.
-- **Diety** – posiłki z produktami, gramatura, automatyczne liczenie kcal / białka / węglowodanów /
-  tłuszczów i porównanie z celem.
+- **Generator planów treningowych** – wpisujesz założenia (cel, poziom, dni w tygodniu, czas, sprzęt,
+  kontuzje, partie priorytetowe), a aplikacja układa plan (FBW / Góra-Dół / PPL) z seriami, powtórzeniami
+  i przerwami. Każde ćwiczenie podmienisz jednym kliknięciem (⇄) na podobne.
+- **Generator diet** – wpisujesz kcal i makro, liczbę posiłków i preferencje (wege, bez laktozy, bez glutenu),
+  a aplikacja dobiera przepisy i przelicza gramatury tak, żeby trafić w cel.
+- **Przepisy** – baza 40 przepisów + własne przepisy.
 - **PDF** – czytelny wydruk planu i diety do wysłania podopiecznemu („Podgląd / PDF” → „Zapisz jako PDF”).
 - **Biblioteka** – własne ćwiczenia i produkty (wartości na 100 g).
 - **Kopia zapasowa** – eksport / import wszystkich danych do pliku.
@@ -37,7 +40,8 @@ npm run dev     # uruchamia aplikację, adres pojawi się w terminalu (zwykle ht
 | `src/types.ts`         | opis danych (podopieczny, plan, dieta…)                |
 | `src/calc.ts`          | obliczenia: BMR, TDEE, makroskładniki                  |
 | `src/store.tsx`        | zapisywanie danych w przeglądarce                      |
-| `src/data/`            | startowa baza ćwiczeń i produktów                      |
+| `src/data/`            | startowa baza ćwiczeń, produktów i przepisów           |
+| `src/generators/`      | generator planów treningowych i diet                   |
 | `src/views/`           | ekrany aplikacji                                       |
 | `src/components/`      | mniejsze elementy wielokrotnego użytku                 |
 | `src/index.css`        | wygląd                                                 |

@@ -1,4 +1,4 @@
-import { fmt, foodMacros, formatDate, macroTargets, sumMacros } from '../calc'
+import { fmt, foodMacros, formatDate, sumMacros } from '../calc'
 import { href } from '../router'
 import { useStore } from '../store'
 import type { MealItem } from '../types'
@@ -13,7 +13,7 @@ export function PrintDiet({ id }: { id: string }) {
   const itemMacros = (i: MealItem) => foodMacros(foodById.get(i.foodId), i.grams)
   const mealTotals = diet.meals.map((m) => sumMacros(m.items.map(itemMacros)))
   const day = sumMacros(mealTotals)
-  const target = client && client.weightKg > 0 ? macroTargets(client, diet.targetKcal) : null
+  const target = diet.target
 
   return (
     <div className="print-page">
@@ -32,7 +32,7 @@ export function PrintDiet({ id }: { id: string }) {
         <p>
           Dziennie: <strong>{fmt(day.kcal)} kcal</strong> · białko {fmt(day.protein)} g · węglowodany{' '}
           {fmt(day.carbs)} g · tłuszcze {fmt(day.fat)} g
-          {target && (
+          {target.kcal > 0 && (
             <span className="muted">
               {' '}
               (cel: {fmt(target.kcal)} kcal, B {target.protein} g, W {target.carbs} g, T {target.fat} g)
@@ -45,7 +45,9 @@ export function PrintDiet({ id }: { id: string }) {
       {diet.meals.map((meal, mi) => (
         <section key={meal.id} className="print-section">
           <h2>
-            {meal.name} <span className="muted small">– {fmt(mealTotals[mi].kcal)} kcal</span>
+            {meal.name}
+            {meal.recipeName && <span className="print-recipe"> · {meal.recipeName}</span>}
+            <span className="print-kcal">{fmt(mealTotals[mi].kcal)} kcal</span>
           </h2>
           {meal.items.length === 0 ? (
             <p className="muted">Brak produktów.</p>
@@ -77,6 +79,11 @@ export function PrintDiet({ id }: { id: string }) {
                 })}
               </tbody>
             </table>
+          )}
+          {meal.instructions && (
+            <p className="print-instructions">
+              <strong>Przygotowanie:</strong> {meal.instructions}
+            </p>
           )}
         </section>
       ))}

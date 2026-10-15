@@ -1,4 +1,5 @@
 import { ExerciseSelect } from '../components/ExerciseSelect'
+import { swapExercise } from '../generators/plan'
 import { NumberInput } from '../components/NumberInput'
 import { href } from '../router'
 import { move, newId, useStore } from '../store'
@@ -36,6 +37,14 @@ export function PlanEditor({ id }: { id: string }) {
       ...day,
       exercises: day.exercises.map((e) => (e.id === exId ? { ...e, ...patch } : e)),
     }))
+  }
+
+  function swap(dayId: string, pe: PlanExercise) {
+    const day = plan!.days.find((d) => d.id === dayId)
+    const current = data.exercises.find((e) => e.id === pe.exerciseId)
+    const next = swapExercise(current, data.exercises, day?.exercises.map((e) => e.exerciseId) ?? [])
+    if (!next) return alert('Brak innego ćwiczenia tego typu w bibliotece.')
+    setExercise(dayId, pe.id, { exerciseId: next.id })
   }
 
   function addDay() {
@@ -129,29 +138,34 @@ export function PlanEditor({ id }: { id: string }) {
                 <tbody>
                   {day.exercises.map((ex, ei) => (
                     <tr key={ex.id}>
-                      <td className="muted">{ei + 1}</td>
-                      <td className="wide">
+                      <td className="muted idx">{ei + 1}</td>
+                      <td className="wide" data-label="Ćwiczenie">
+                        <div className="ex-cell">
                         <ExerciseSelect
                           exercises={data.exercises}
                           value={ex.exerciseId}
                           onChange={(exerciseId) => setExercise(day.id, ex.id, { exerciseId })}
                         />
+                        <button className="swap" title="Zamień na podobne ćwiczenie" onClick={() => swap(day.id, ex)}>
+                          ⇄
+                        </button>
+                        </div>
                       </td>
-                      <td>
+                      <td data-label="Serie">
                         <NumberInput
                           className="narrow"
                           value={ex.sets}
                           onChange={(sets) => setExercise(day.id, ex.id, { sets })}
                         />
                       </td>
-                      <td>
+                      <td data-label="Powt.">
                         <input
                           className="narrow"
                           value={ex.reps}
                           onChange={(e) => setExercise(day.id, ex.id, { reps: e.target.value })}
                         />
                       </td>
-                      <td>
+                      <td data-label="Ciężar">
                         <input
                           className="narrow"
                           placeholder="np. 60 kg"
@@ -159,14 +173,14 @@ export function PlanEditor({ id }: { id: string }) {
                           onChange={(e) => setExercise(day.id, ex.id, { weight: e.target.value })}
                         />
                       </td>
-                      <td>
+                      <td data-label="Przerwa">
                         <input
                           className="narrow"
                           value={ex.rest}
                           onChange={(e) => setExercise(day.id, ex.id, { rest: e.target.value })}
                         />
                       </td>
-                      <td>
+                      <td data-label="Uwagi">
                         <input
                           placeholder="tempo, technika…"
                           value={ex.notes}

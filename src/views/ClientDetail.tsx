@@ -37,36 +37,8 @@ export function ClientDetail({ id }: { id: string }) {
     navigate({ name: 'clients' })
   }
 
-  function addPlan() {
-    const plan: TrainingPlan = {
-      id: newId(),
-      clientId: id,
-      name: 'Plan treningowy',
-      notes: '',
-      days: [{ id: newId(), name: 'Dzień A', exercises: [] }],
-      createdAt: new Date().toISOString(),
-    }
-    update((d) => ({ ...d, plans: [...d.plans, plan] }))
-    navigate({ name: 'plan', id: plan.id })
-  }
-
-  function addDiet() {
-    const diet: Diet = {
-      id: newId(),
-      clientId: id,
-      name: 'Dieta',
-      notes: '',
-      targetKcal: kcal ?? 2000,
-      meals: ['Śniadanie', 'II śniadanie', 'Obiad', 'Podwieczorek', 'Kolacja'].map((name) => ({
-        id: newId(),
-        name,
-        items: [],
-      })),
-      createdAt: new Date().toISOString(),
-    }
-    update((d) => ({ ...d, diets: [...d.diets, diet] }))
-    navigate({ name: 'diet', id: diet.id })
-  }
+  const addPlan = () => navigate({ name: 'plan-new', id })
+  const addDiet = () => navigate({ name: 'diet-new', id })
 
   function duplicatePlan(p: TrainingPlan) {
     const copy: TrainingPlan = {
@@ -197,7 +169,7 @@ export function ClientDetail({ id }: { id: string }) {
         <div className="section-head">
           <h2>Plany treningowe</h2>
           <button className="primary" onClick={addPlan}>
-            + Nowy plan
+            ⚡ Nowy plan
           </button>
         </div>
         {plans.length === 0 ? (
@@ -232,7 +204,7 @@ export function ClientDetail({ id }: { id: string }) {
         <div className="section-head">
           <h2>Diety</h2>
           <button className="primary" onClick={addDiet}>
-            + Nowa dieta
+            ⚡ Nowa dieta
           </button>
         </div>
         {diets.length === 0 ? (
@@ -245,7 +217,7 @@ export function ClientDetail({ id }: { id: string }) {
                   <strong>{x.name}</strong>
                   <span className="muted small">
                     {' '}
-                    · {x.targetKcal} kcal · {formatDate(x.createdAt)}
+                    · {x.target.kcal} kcal · {formatDate(x.createdAt)}
                   </span>
                 </a>
                 <span className="actions">
