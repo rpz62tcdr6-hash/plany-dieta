@@ -51,15 +51,29 @@ export interface Exercise {
   stress?: Joint[]
 }
 
+/** Zapis wykonania – ciężar i powtórzenia z danego dnia */
+export interface LogEntry {
+  id: string
+  /** Data w formacie RRRR-MM-DD */
+  date: string
+  weight: number
+  reps: string
+}
+
 export interface PlanExercise {
   id: string
   exerciseId: string
   sets: number
   reps: string
+  /** Docelowy ciężar wpisany przez trenera */
   weight: string
   rest: string
   notes: string
+  log?: LogEntry[]
 }
+
+export type TrainingGoal = 'sila' | 'masa' | 'redukcja' | 'kondycja'
+export type Level = 'poczatkujacy' | 'sredni' | 'zaawansowany'
 
 export interface PlanDay {
   id: string
@@ -73,6 +87,9 @@ export interface TrainingPlan {
   name: string
   notes: string
   days: PlanDay[]
+  /** Cel i poziom – punkt odniesienia dla zaleceń objętości */
+  goal?: TrainingGoal
+  level?: Level
   createdAt: string
 }
 

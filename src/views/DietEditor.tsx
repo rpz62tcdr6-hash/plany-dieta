@@ -4,6 +4,7 @@ import { FoodSelect } from '../components/FoodSelect'
 import { MacroInputs } from '../components/MacroInputs'
 import { MacroSummary } from '../components/MacroSummary'
 import { NumberInput } from '../components/NumberInput'
+import { ProteinBadge } from '../components/ProteinBadge'
 import { MEAL_TYPE_LABELS } from '../data/recipes'
 import { NO_PREFS, fitItems, generateMeals, recipeAllowed, recipeMacros, rerollMeal } from '../generators/diet'
 import { href } from '../router'
@@ -104,7 +105,11 @@ export function DietEditor({ id }: { id: string }) {
         </div>
         {editTarget && (
           <div className="target-edit">
-            <MacroInputs value={diet.target} onChange={(target) => setDiet((d) => ({ ...d, target }))} />
+            <MacroInputs
+              value={diet.target}
+              onChange={(target) => setDiet((d) => ({ ...d, target }))}
+              weightKg={client?.weightKg ?? 0}
+            />
             <p className="muted small">
               Po zmianie celu kliknij „Dopasuj gramatury” – ilości produktów przeliczą się pod nowy cel.
             </p>
@@ -139,6 +144,7 @@ export function DietEditor({ id }: { id: string }) {
                 <span className="meal-kcal">
                   <strong>{fmt(total.kcal)}</strong> / {fmt(goalKcal)} kcal
                 </span>
+                <ProteinBadge protein={total.protein} weightKg={client?.weightKg ?? 0} snack={meal.type === 'przekaska'} />
               </div>
               <span className="actions">
                 <button disabled={mi === 0} onClick={() => setMeals((ms) => move(ms, mi, -1))} title="W górę">

@@ -7,6 +7,16 @@ import { href, navigate } from '../router'
 import { newId, useStore } from '../store'
 import type { Diet, DietPrefs, Macros } from '../types'
 
+/** Ogólne zalecenia dopisywane do nowej diety */
+function dietNotes(sex: 'M' | 'K'): string {
+  return [
+    `Nawodnienie: ok. ${sex === 'K' ? '2,0' : '2,5'} l wody dziennie (z napojów i jedzenia) + uzupełnianie strat potu na treningu (EFSA 2010).`,
+    'Białko rozkładaj równomiernie – ok. 0,25–0,4 g/kg masy ciała w każdym głównym posiłku, co 3–4 h (ISSN 2017; Schoenfeld i Aragon 2018).',
+    'Warzywa i owoce: min. 400 g dziennie (WHO); błonnik ok. 25 g dziennie (EFSA).',
+    'Kontrola: waż się 3–4× w tygodniu rano i patrz na średnią tygodniową – na redukcji celuj w spadek 0,5–1% masy ciała tygodniowo.',
+  ].join('\n')
+}
+
 export function DietGenerator({ clientId }: { clientId: string }) {
   const { data, update } = useStore()
   const client = data.clients.find((c) => c.id === clientId)
@@ -37,7 +47,7 @@ export function DietGenerator({ clientId }: { clientId: string }) {
     if (missing.length) {
       alert(`Brak pasujących przepisów dla: ${missing.join(', ')}. Dodaj własne przepisy albo złagodź preferencje.`)
     }
-    save({ name: `Dieta ${target.kcal} kcal`, notes: '', target, prefs, meals })
+    save({ name: `Dieta ${target.kcal} kcal`, notes: dietNotes(client!.sex), target, prefs, meals })
   }
 
   function empty() {
@@ -64,7 +74,7 @@ export function DietGenerator({ clientId }: { clientId: string }) {
           <span className="step-no">1</span> Kalorie i makroskładniki
         </h2>
         <p className="muted small">Wstępnie wyliczone z danych podopiecznego – możesz wpisać własne.</p>
-        <MacroInputs value={target} onChange={setTarget} />
+        <MacroInputs value={target} onChange={setTarget} weightKg={client.weightKg} />
       </section>
 
       <section className="card step">

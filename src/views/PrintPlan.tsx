@@ -1,4 +1,4 @@
-import { formatDate } from '../calc'
+import { fmt, formatDate } from '../calc'
 import { href } from '../router'
 import { useStore } from '../store'
 
@@ -9,6 +9,11 @@ export function PrintPlan({ id }: { id: string }) {
 
   const client = data.clients.find((c) => c.id === plan.clientId)
   const exName = (exId: string) => data.exercises.find((e) => e.id === exId)?.name ?? '—'
+  const hasLog = plan.days.some((d) => d.exercises.some((e) => e.log?.length))
+  const lastLog = (log: { date: string; weight: number; reps: string }[] | undefined) => {
+    const last = [...(log ?? [])].sort((a, b) => a.date.localeCompare(b.date)).pop()
+    return last ? `${fmt(last.weight, last.weight % 1 ? 1 : 0)} kg × ${last.reps}` : ''
+  }
 
   return (
     <div className="print-page">
@@ -41,6 +46,7 @@ export function PrintPlan({ id }: { id: string }) {
                   <th>Serie</th>
                   <th>Powtórzenia</th>
                   <th>Ciężar</th>
+                  {hasLog && <th>Ostatnio</th>}
                   <th>Przerwa</th>
                   <th>Uwagi</th>
                 </tr>
@@ -53,6 +59,7 @@ export function PrintPlan({ id }: { id: string }) {
                     <td>{ex.sets}</td>
                     <td>{ex.reps}</td>
                     <td>{ex.weight}</td>
+                    {hasLog && <td>{lastLog(ex.log)}</td>}
                     <td>{ex.rest}</td>
                     <td>{ex.notes}</td>
                   </tr>

@@ -311,3 +311,105 @@ button.link { border: none; padding: 0; background: none; color: var(--red); tex
   .recipe-bar .actions, .recipe-select { width: 100%; max-width: none; }
   .recipe-bar .actions > * { flex: 1 1 auto; }
 }
+
+/* ——— Karta podopiecznego ——— */
+.client-hero {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap;
+  background: var(--black); color: #fff; border-radius: var(--radius); padding: 1.4rem 1.5rem;
+  border-bottom: 4px solid var(--red); margin-bottom: 1.5rem;
+}
+.client-hero h1 { color: #fff; }
+.hero-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.hero-stats div { display: flex; flex-direction: column; }
+.hero-stats span { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #9a9a9a; }
+.hero-stats strong { font-size: 1.4rem; font-weight: 900; }
+.section-title { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin: 1.75rem 0 0.75rem; }
+.section-title h2 { margin: 0; font-size: 1.2rem; }
+.section-title h2::before {
+  content: ''; display: inline-block; width: 5px; height: 1em; background: var(--red); margin-right: 0.6rem; vertical-align: -0.12em;
+}
+.empty-card p { margin: 0; color: var(--muted); }
+.danger-zone { border-top: 1px solid var(--border); margin-top: 1rem; padding-top: 1rem; text-align: right; }
+
+details.fold > summary {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  cursor: pointer; list-style: none;
+}
+details.fold > summary::-webkit-details-marker { display: none; }
+.fold-title { display: flex; flex-direction: column; gap: 0.1rem; }
+.fold-title strong { font-size: 1.1rem; font-weight: 800; }
+.fold-title strong::before { content: '▸ '; color: var(--red); }
+details.fold[open] .fold-title strong::before { content: '▾ '; }
+details.fold[open] > summary { padding-bottom: 0.9rem; margin-bottom: 0.9rem; border-bottom: 2px solid var(--black); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 700; white-space: nowrap;
+  padding: 0.2rem 0.6rem; border-radius: 999px; background: var(--bg); color: var(--text); border: 1px solid var(--border);
+}
+.badge.dark { background: var(--black); color: #fff; border-color: var(--black); }
+.badge.ok { background: var(--black); color: #fff; border-color: var(--black); }
+.badge.low { background: var(--red-soft); color: var(--red); border-color: #ffc9c5; }
+
+/* Plan – podgląd z dziennikiem ciężarów */
+.preview-day { margin-bottom: 1.25rem; }
+.preview-day-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+.preview-day-head h3 { margin: 0; color: var(--text); font-size: 0.9rem; }
+.ex-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem 1rem; align-items: center;
+  padding: 0.7rem 0; border-top: 1px solid var(--border);
+}
+.ex-info { display: flex; gap: 0.7rem; align-items: flex-start; }
+.ex-index {
+  flex: none; display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  background: var(--black); color: #fff; font-size: 0.78rem; font-weight: 800;
+}
+.ex-log { display: flex; gap: 0.9rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.ex-last { display: flex; flex-direction: column; align-items: flex-end; min-width: 8rem; }
+.ex-last strong { font-size: 1rem; font-weight: 900; }
+.ex-last .up { color: #111; font-size: 0.8rem; }
+.ex-last .down { color: var(--red); font-size: 0.8rem; }
+.log-form { display: flex; gap: 0.35rem; }
+.log-form input { width: 4.3rem; padding: 0.45rem 0.5rem; font-weight: 700; }
+.log-form button { padding: 0.45rem 0.8rem; }
+.log-history {
+  grid-column: 1 / -1; list-style: none; margin: 0; padding: 0.5rem 0.75rem; background: var(--bg); border-radius: 10px;
+}
+.log-history li { display: flex; gap: 1rem; align-items: center; padding: 0.25rem 0; font-size: 0.9rem; }
+.log-history li strong { flex: 1; }
+@media (max-width: 700px) {
+  .ex-row { grid-template-columns: minmax(0, 1fr); }
+  .ex-row > *, .ex-info > div { min-width: 0; }
+  .ex-log { justify-content: space-between; }
+  .ex-last { align-items: flex-start; }
+  .log-form { flex: 1 1 100%; min-width: 0; }
+  .log-form input { flex: 1 1 0; width: 0; min-width: 0; }
+  details.fold > summary .actions { width: 100%; }
+}
+
+/* Dieta – podgląd */
+.summary-card.mini { border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 0.75rem; }
+.preview-meal { padding: 0.75rem 0; border-top: 1px solid var(--border); }
+.preview-meal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.6rem; flex-wrap: wrap; }
+.preview-meal-head strong { font-size: 1.02rem; font-weight: 800; }
+.preview-items { margin: 0.35rem 0 0.2rem; font-size: 0.92rem; }
+
+/* Objętość tygodniowa */
+.volume { display: grid; gap: 0.45rem; }
+.volume-row { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 6.5rem 4.5rem; gap: 0.75rem; align-items: center; }
+.volume-name { font-weight: 700; font-size: 0.9rem; }
+.volume-bar { position: relative; height: 10px; background: var(--bg); border-radius: 5px; overflow: hidden; }
+.volume-range { position: absolute; top: 0; bottom: 0; background: #d4d4d4; }
+.volume-fill { position: absolute; top: 3px; bottom: 3px; left: 0; background: #8a8a8a; border-radius: 2px; }
+.volume-row.ok .volume-fill { background: var(--black); }
+.volume-row.over .volume-fill, .volume-row.under .volume-fill { background: var(--red); }
+.volume-value { font-size: 0.9rem; text-align: right; font-variant-numeric: tabular-nums; }
+.volume-row.under .volume-value strong, .volume-row.over .volume-value strong { color: var(--red); }
+.volume-freq { font-size: 0.78rem; color: var(--muted); font-weight: 600; text-align: right; }
+.volume-freq.warn { color: var(--red); }
+@media (max-width: 600px) {
+  .volume-row { grid-template-columns: 6.5rem minmax(0, 1fr) 5.2rem; }
+  .volume-freq { display: none; }
+}
+
+.section-head .actions select { width: auto; }
+.volume-fill { top: 2px; bottom: 2px; z-index: 1; }

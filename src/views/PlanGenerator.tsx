@@ -154,7 +154,13 @@ export function PlanGenerator({ clientId }: { clientId: string }) {
         <button
           className="ghost"
           onClick={() =>
-            save({ name: 'Plan treningowy', notes: '', days: [{ id: newId(), name: 'Dzień A', exercises: [] }] })
+            save({
+              name: 'Plan treningowy',
+              notes: '',
+              days: [{ id: newId(), name: 'Dzień A', exercises: [] }],
+              goal: params.goal,
+              level: params.level,
+            })
           }
         >
           Pusty plan

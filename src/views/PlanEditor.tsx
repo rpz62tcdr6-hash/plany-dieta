@@ -1,9 +1,11 @@
 import { ExerciseSelect } from '../components/ExerciseSelect'
-import { swapExercise } from '../generators/plan'
+import { GOAL_LABELS, LEVEL_LABELS, swapExercise } from '../generators/plan'
+import { estimateMinutes } from '../generators/volume'
+import { VolumePanel } from '../components/VolumePanel'
 import { NumberInput } from '../components/NumberInput'
 import { href } from '../router'
 import { move, newId, useStore } from '../store'
-import type { PlanDay, PlanExercise, TrainingPlan } from '../types'
+import type { Level, PlanDay, PlanExercise, TrainingGoal, TrainingPlan } from '../types'
 
 export function PlanEditor({ id }: { id: string }) {
   const { data, update } = useStore()
@@ -89,6 +91,37 @@ export function PlanEditor({ id }: { id: string }) {
         </label>
       </section>
 
+      <section className="card">
+        <div className="section-head">
+          <h2>Objętość tygodniowa</h2>
+          <span className="actions">
+            <select
+              value={plan.goal ?? 'masa'}
+              onChange={(e) => setPlan((p) => ({ ...p, goal: e.target.value as TrainingGoal }))}
+              aria-label="Cel planu"
+            >
+              {(Object.keys(GOAL_LABELS) as TrainingGoal[]).map((g) => (
+                <option key={g} value={g}>
+                  {GOAL_LABELS[g]}
+                </option>
+              ))}
+            </select>
+            <select
+              value={plan.level ?? 'sredni'}
+              onChange={(e) => setPlan((p) => ({ ...p, level: e.target.value as Level }))}
+              aria-label="Poziom"
+            >
+              {(Object.keys(LEVEL_LABELS) as Level[]).map((l) => (
+                <option key={l} value={l}>
+                  {LEVEL_LABELS[l]}
+                </option>
+              ))}
+            </select>
+          </span>
+        </div>
+        <VolumePanel days={plan.days} exercises={data.exercises} goal={plan.goal ?? 'masa'} level={plan.level ?? 'sredni'} />
+      </section>
+
       {plan.days.map((day, di) => (
         <section className="card" key={day.id}>
           <div className="section-head">
@@ -98,6 +131,9 @@ export function PlanEditor({ id }: { id: string }) {
               onChange={(e) => setDay(day.id, (d) => ({ ...d, name: e.target.value }))}
               aria-label="Nazwa dnia"
             />
+            <span className="badge" title="Szacowany czas: rozgrzewka + serie + przerwy">
+              ⏱ ok. {estimateMinutes(day.exercises, data.exercises)} min · {day.exercises.reduce((a, e) => a + e.sets, 0)} serii
+            </span>
             <span className="actions">
               <button title="Przesuń w górę" onClick={() => setDays((days) => move(days, di, -1))} disabled={di === 0}>
                 ↑
@@ -168,7 +204,7 @@ export function PlanEditor({ id }: { id: string }) {
                       <td data-label="Ciężar">
                         <input
                           className="narrow"
-                          placeholder="np. 60 kg"
+                          placeholder="cel, np. 60 kg"
                           value={ex.weight}
                           onChange={(e) => setExercise(day.id, ex.id, { weight: e.target.value })}
                         />

@@ -1,9 +1,18 @@
-import { fmt } from '../calc'
+import { fmt, macroWarnings } from '../calc'
 import type { Macros } from '../types'
 import { NumberInput } from './NumberInput'
 
 /** Pola kcal + B/W/T, z podpowiedzią ile kcal wynika z wpisanego makro */
-export function MacroInputs({ value, onChange }: { value: Macros; onChange: (m: Macros) => void }) {
+export function MacroInputs({
+  value,
+  onChange,
+  weightKg = 0,
+}: {
+  value: Macros
+  onChange: (m: Macros) => void
+  weightKg?: number
+}) {
+  const warnings = macroWarnings(value, weightKg)
   const fromMacros = value.protein * 4 + value.carbs * 4 + value.fat * 9
   const diff = value.kcal > 0 && fromMacros > 0 ? Math.abs(fromMacros - value.kcal) / value.kcal : 0
   return (
@@ -44,6 +53,17 @@ export function MacroInputs({ value, onChange }: { value: Macros; onChange: (m: 
           )}
         </p>
       )}
+      {weightKg > 0 && value.protein > 0 && (
+        <p className="muted small">
+          Białko: {fmt(value.protein / weightKg, 1)} g/kg masy ciała · Tłuszcze:{' '}
+          {value.kcal > 0 ? Math.round(((value.fat * 9) / value.kcal) * 100) : 0}% energii
+        </p>
+      )}
+      {warnings.map((w) => (
+        <p key={w} className="small warn-text">
+          ⚠ {w}
+        </p>
+      ))}
     </div>
   )
 }
