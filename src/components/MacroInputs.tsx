@@ -1,4 +1,4 @@
-import { fmt, macroWarnings } from '../calc'
+import { fmt, kcalFromMacros, macroWarnings } from '../calc'
 import type { Macros } from '../types'
 import { NumberInput } from './NumberInput'
 
@@ -13,44 +13,45 @@ export function MacroInputs({
   weightKg?: number
 }) {
   const warnings = macroWarnings(value, weightKg)
-  const fromMacros = value.protein * 4 + value.carbs * 4 + value.fat * 9
-  const diff = value.kcal > 0 && fromMacros > 0 ? Math.abs(fromMacros - value.kcal) / value.kcal : 0
+  const hasMacros = value.protein > 0 || value.carbs > 0 || value.fat > 0
+  // Zmiana makro → kalorie przeliczają się same
+  const setMacro = (patch: Partial<Macros>) => {
+    const next = { ...value, ...patch }
+    onChange({ ...next, kcal: kcalFromMacros(next) })
+  }
+  // Zmiana kalorii → białko i tłuszcze zostają, dopasowują się węglowodany
+  const setKcal = (kcal: number) => {
+    if (!hasMacros) return onChange({ ...value, kcal })
+    const carbs = Math.max(0, Math.round((kcal - value.protein * 4 - value.fat * 9) / 4))
+    onChange({ ...value, kcal, carbs })
+  }
   return (
     <div>
       <div className="macro-inputs">
         <label className="macro-input kcal">
           <span>Kalorie</span>
-          <NumberInput step={10} value={value.kcal} onChange={(kcal) => onChange({ ...value, kcal })} />
+          <NumberInput step={10} value={value.kcal} onChange={setKcal} />
           <small>kcal</small>
         </label>
         <label className="macro-input">
           <span>Białko</span>
-          <NumberInput value={value.protein} onChange={(protein) => onChange({ ...value, protein })} />
+          <NumberInput value={value.protein} onChange={(protein) => setMacro({ protein })} />
           <small>g</small>
         </label>
         <label className="macro-input">
           <span>Węglowodany</span>
-          <NumberInput value={value.carbs} onChange={(carbs) => onChange({ ...value, carbs })} />
+          <NumberInput value={value.carbs} onChange={(carbs) => setMacro({ carbs })} />
           <small>g</small>
         </label>
         <label className="macro-input">
           <span>Tłuszcze</span>
-          <NumberInput value={value.fat} onChange={(fat) => onChange({ ...value, fat })} />
+          <NumberInput value={value.fat} onChange={(fat) => setMacro({ fat })} />
           <small>g</small>
         </label>
       </div>
-      {fromMacros > 0 && (
-        <p className={`small ${diff > 0.05 ? 'warn-text' : 'muted'}`}>
-          Z makro wychodzi {fmt(fromMacros)} kcal
-          {diff > 0.05 && (
-            <>
-              {' '}
-              – to inaczej niż wpisane {fmt(value.kcal)} kcal.{' '}
-              <button type="button" className="link" onClick={() => onChange({ ...value, kcal: Math.round(fromMacros) })}>
-                Ustaw {fmt(fromMacros)} kcal
-              </button>
-            </>
-          )}
+      {hasMacros && (
+        <p className="muted small">
+          Kalorie liczą się z makro (B i W × 4 kcal, T × 9 kcal). Zmiana kalorii dopasowuje węglowodany.
         </p>
       )}
       {weightKg > 0 && value.protein > 0 && (

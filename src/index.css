@@ -491,3 +491,7 @@ details.fold[open] > summary { padding-bottom: 0.9rem; margin-bottom: 0.9rem; bo
 .link-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
 .tag.video { background: var(--red); }
 .video-link { margin-left: 0.6rem; font-size: 0.85rem; font-weight: 800; }
+
+.client-macros { border-top: 1px solid var(--border); margin-top: 1rem; padding-top: 1rem; }
+.client-macros h3 { margin-top: 0; }
+.ok-text { color: #111; font-weight: 700; }

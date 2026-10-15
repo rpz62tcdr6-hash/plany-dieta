@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { GOALS, targetKcal } from '../calc'
+import { GOALS, effectiveTarget } from '../calc'
 import { href, navigate } from '../router'
 import { newId, useStore } from '../store'
 import type { Client } from '../types'
@@ -57,7 +57,7 @@ export function ClientsView() {
           {clients.map((c) => {
             const plans = data.plans.filter((p) => p.clientId === c.id).length
             const diets = data.diets.filter((p) => p.clientId === c.id).length
-            const kcal = targetKcal(c)
+            const kcal = effectiveTarget(c)?.kcal ?? null
             return (
               <a key={c.id} className="card client-card" href={href({ name: 'client', id: c.id })}>
                 <strong>{c.name || 'Bez imienia'}</strong>

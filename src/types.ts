@@ -12,6 +12,8 @@ export interface Client {
   activity: number
   goal: Goal
   notes: string
+  /** Makro ustawione przez trenera (zastępuje wyliczone ze wzoru) */
+  target?: Macros
   createdAt: string
 }
 

@@ -58,6 +58,23 @@ export function macroTargets(c: Client, kcal: number): Macros {
   return { kcal, protein, carbs, fat }
 }
 
+/** Aktualny cel podopiecznego: makro ustawione przez trenera albo wyliczone ze wzoru */
+export function effectiveTarget(c: Client): Macros | null {
+  if (c.target && c.target.kcal > 0) return c.target
+  const kcal = targetKcal(c)
+  return kcal === null ? null : macroTargets(c, kcal)
+}
+
+/** Kalorie wynikające z makro: 4 kcal/g białka i węglowodanów, 9 kcal/g tłuszczu */
+export function kcalFromMacros(m: Pick<Macros, 'protein' | 'carbs' | 'fat'>): number {
+  return Math.round(m.protein * 4 + m.carbs * 4 + m.fat * 9)
+}
+
+/** Automatyczna nazwa „Dieta 1800 kcal” podąża za zmianą kalorii; własnych nazw nie ruszamy */
+export function dietNameFor(name: string, kcal: number): string {
+  return /^Dieta \d+ kcal$/.test(name) ? `Dieta ${Math.round(kcal)} kcal` : name
+}
+
 /** Uwagi, gdy makro wychodzi poza zalecenia */
 export function macroWarnings(m: Macros, weightKg: number): string[] {
   const out: string[] = []

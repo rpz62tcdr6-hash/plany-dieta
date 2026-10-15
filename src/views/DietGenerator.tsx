@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { macroTargets, targetKcal } from '../calc'
+import { effectiveTarget } from '../calc'
 import { ChoiceChips } from '../components/Chips'
 import { MacroInputs } from '../components/MacroInputs'
 import { MEAL_LAYOUTS, NO_PREFS, generateMeals } from '../generators/diet'
@@ -20,10 +20,9 @@ function dietNotes(sex: 'M' | 'K'): string {
 export function DietGenerator({ clientId }: { clientId: string }) {
   const { data, update } = useStore()
   const client = data.clients.find((c) => c.id === clientId)
-  const [target, setTarget] = useState<Macros>(() => {
-    const kcal = client ? targetKcal(client) : null
-    return client && kcal !== null ? macroTargets(client, kcal) : { kcal: 2000, protein: 0, carbs: 0, fat: 0 }
-  })
+  const [target, setTarget] = useState<Macros>(
+    () => (client && effectiveTarget(client)) || { kcal: 2000, protein: 0, carbs: 0, fat: 0 },
+  )
   const [mealsCount, setMealsCount] = useState(5)
   const [prefs, setPrefs] = useState<DietPrefs>(NO_PREFS)
 
@@ -38,7 +37,11 @@ export function DietGenerator({ clientId }: { clientId: string }) {
 
   function save(diet: Omit<Diet, 'id' | 'clientId' | 'createdAt'>) {
     const full: Diet = { ...diet, id: newId(), clientId, createdAt: new Date().toISOString() }
-    update((d) => ({ ...d, diets: [...d.diets, full] }))
+    update((d) => ({
+      ...d,
+      diets: [...d.diets, full],
+      clients: d.clients.map((c) => (c.id === clientId ? { ...c, target: diet.target } : c)),
+    }))
     navigate({ name: 'diet', id: full.id })
   }
 
@@ -73,7 +76,7 @@ export function DietGenerator({ clientId }: { clientId: string }) {
         <h2>
           <span className="step-no">1</span> Kalorie i makroskładniki
         </h2>
-        <p className="muted small">Wstępnie wyliczone z danych podopiecznego – możesz wpisać własne.</p>
+        <p className="muted small">Aktualne makro podopiecznego – możesz je zmienić. Kalorie przeliczą się same.</p>
         <MacroInputs value={target} onChange={setTarget} weightKg={client.weightKg} />
       </section>
 

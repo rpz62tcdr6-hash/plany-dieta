@@ -1,15 +1,19 @@
-import { ACTIVITY_LEVELS, GOALS, PROTEIN_PER_KG, bmr, formatDate, macroTargets, targetKcal, tdee } from '../calc'
+import { useState } from 'react'
+import { ACTIVITY_LEVELS, GOALS, PROTEIN_PER_KG, bmr, dietNameFor, effectiveTarget, formatDate, macroTargets, targetKcal, tdee } from '../calc'
+import { MacroInputs } from '../components/MacroInputs'
+import { fitItems } from '../generators/diet'
 import { DietPreview } from '../components/DietPreview'
 import { NumberInput } from '../components/NumberInput'
 import { PlanPreview } from '../components/PlanPreview'
 import { href, navigate } from '../router'
 import { newId, useStore } from '../store'
-import type { Client, Diet, Goal, TrainingPlan } from '../types'
+import type { Client, Diet, Goal, Macros, MealItem, TrainingPlan } from '../types'
 
 const newestFirst = <T extends { createdAt: string }>(a: T, b: T) => b.createdAt.localeCompare(a.createdAt)
 
 export function ClientDetail({ id }: { id: string }) {
   const { data, update } = useStore()
+  const [macroInfo, setMacroInfo] = useState('')
   const client = data.clients.find((c) => c.id === id)
 
   if (!client) {
@@ -26,6 +30,7 @@ export function ClientDetail({ id }: { id: string }) {
   const kcal = targetKcal(client)
   const macros = kcal !== null ? macroTargets(client, kcal) : null
   const missingData = kcal === null
+  const current = effectiveTarget(client)
 
   function set(patch: Partial<Client>) {
     update((d) => ({ ...d, clients: d.clients.map((c) => (c.id === id ? { ...c, ...patch } : c)) }))
@@ -83,12 +88,12 @@ export function ClientDetail({ id }: { id: string }) {
             <strong>{client.weightKg ? `${client.weightKg} kg` : '—'}</strong>
           </div>
           <div>
-            <span>Cel kcal</span>
-            <strong>{kcal ?? '—'}</strong>
+            <span>Kalorie</span>
+            <strong>{current ? current.kcal : '—'}</strong>
           </div>
           <div>
-            <span>Białko</span>
-            <strong>{macros ? `${macros.protein} g` : '—'}</strong>
+            <span>B / W / T</span>
+            <strong>{current ? `${current.protein} / ${current.carbs} / ${current.fat}` : '—'}</strong>
           </div>
         </div>
       </div>
@@ -255,7 +260,7 @@ export function ClientDetail({ id }: { id: string }) {
                   </div>
                 </div>
                 <p className="small">
-                  Makro: <b>B {macros.protein} g</b> · <b>W {macros.carbs} g</b> · <b>T {macros.fat} g</b>
+                  Wyliczone ze wzoru: <b>B {macros.protein} g</b> · <b>W {macros.carbs} g</b> · <b>T {macros.fat} g</b>
                 </p>
                 <p className="muted small">
                   BMR: wzór Mifflina-St Jeora (najdokładniejszy wg przeglądu Frankenfield i wsp. 2005). Białko{' '}
@@ -266,12 +271,82 @@ export function ClientDetail({ id }: { id: string }) {
             )}
           </div>
         </div>
+        <ClientMacros
+          key={current ? `${current.kcal}-${current.protein}-${current.carbs}-${current.fat}` : 'brak'}
+          client={client}
+          formula={macros}
+          info={macroInfo}
+          setInfo={setMacroInfo}
+        />
         <div className="danger-zone">
           <button className="danger" onClick={removeClient}>
             Usuń podopiecznego
           </button>
         </div>
       </details>
+    </div>
+  )
+}
+
+/** Makro podopiecznego – zapis aktualizuje też cel najnowszej diety i przelicza jej gramatury */
+function ClientMacros({
+  client,
+  formula,
+  info,
+  setInfo,
+}: {
+  client: Client
+  formula: Macros | null
+  info: string
+  setInfo: (s: string) => void
+}) {
+  const { data, update } = useStore()
+  const saved = effectiveTarget(client)
+  const [draft, setDraft] = useState<Macros>(saved ?? { kcal: 0, protein: 0, carbs: 0, fat: 0 })
+  const diet = data.diets.filter((d) => d.clientId === client.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
+  const changed = !saved || (['kcal', 'protein', 'carbs', 'fat'] as const).some((k) => saved[k] !== draft[k])
+
+  function apply(target: Macros | undefined, effective: Macros) {
+    const foods = new Map(data.foods.map((f) => [f.id, f]))
+    update((d) => ({
+      ...d,
+      clients: d.clients.map((c) => (c.id === client.id ? { ...c, target } : c)),
+      diets: d.diets.map((x) => {
+        if (!diet || x.id !== diet.id) return x
+        const fitted = fitItems(x.meals.flatMap((m) => m.items), effective, foods)
+        const byId = new Map(fitted.map((i) => [i.id, i]))
+        return {
+          ...x,
+          name: dietNameFor(x.name, effective.kcal),
+          target: effective,
+          meals: x.meals.map((m) => ({ ...m, items: m.items.map((i) => byId.get(i.id)).filter((i): i is MealItem => !!i) })),
+        }
+      }),
+    }))
+    setDraft(effective)
+    setInfo(diet ? `Zapisano. Dieta „${dietNameFor(diet.name, effective.kcal)}” została przeliczona pod nowe makro.` : 'Zapisano.')
+  }
+
+  return (
+    <div className="client-macros">
+      <h3>Makro podopiecznego</h3>
+      <MacroInputs
+        value={draft}
+        onChange={(m) => {
+          setDraft(m)
+          setInfo('')
+        }}
+        weightKg={client.weightKg}
+      />
+      <div className="actions">
+        <button className="primary" disabled={!changed || draft.kcal <= 0} onClick={() => apply(draft, draft)}>
+          {diet ? 'Zapisz i przelicz dietę' : 'Zapisz makro'}
+        </button>
+        {client.target && formula && (
+          <button onClick={() => apply(undefined, formula)}>↺ Przywróć wyliczone ze wzoru</button>
+        )}
+      </div>
+      {info && <p className="small ok-text">✓ {info}</p>}
     </div>
   )
 }

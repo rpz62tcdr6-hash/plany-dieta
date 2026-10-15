@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fmt, foodMacros, sumMacros } from '../calc'
+import { dietNameFor, fmt, foodMacros, sumMacros } from '../calc'
 import { FoodSelect } from '../components/FoodSelect'
 import { MacroInputs } from '../components/MacroInputs'
 import { MacroSummary } from '../components/MacroSummary'
@@ -134,7 +134,13 @@ export function DietEditor({ id }: { id: string }) {
           <div className="target-edit">
             <MacroInputs
               value={diet.target}
-              onChange={(target) => setDiet((d) => ({ ...d, target }))}
+              onChange={(target) =>
+                update((d) => ({
+                  ...d,
+                  diets: d.diets.map((x) => (x.id === id ? { ...x, target, name: dietNameFor(x.name, target.kcal) } : x)),
+                  clients: d.clients.map((c) => (c.id === diet.clientId ? { ...c, target } : c)),
+                }))
+              }
               weightKg={client?.weightKg ?? 0}
             />
             <p className="muted small">
