@@ -5,7 +5,7 @@ import { MEAL_TYPE_LABELS } from '../data/recipes'
 import { href, navigate } from '../router'
 import { useStore } from '../store'
 import type { MealType, Recipe } from '../types'
-import { RecipeTags } from './Recipes'
+import { RecipeTags, safeLink } from './Recipes'
 
 export function RecipeEditor({ id }: { id: string }) {
   const { data, update } = useStore()
@@ -151,6 +151,23 @@ export function RecipeEditor({ id }: { id: string }) {
       </section>
 
       <section className="card">
+        <label className="block">
+          Link do wideo z przepisem (TikTok, Instagram, YouTube)
+          <span className="link-row">
+            <input
+              type="url"
+              inputMode="url"
+              placeholder="https://www.tiktok.com/@…"
+              value={recipe.link ?? ''}
+              onChange={(e) => set((r) => ({ ...r, link: e.target.value.trim() || undefined }))}
+            />
+            {safeLink(recipe.link) && (
+              <a className="button" href={safeLink(recipe.link)} target="_blank" rel="noopener noreferrer">
+                ▶ Otwórz
+              </a>
+            )}
+          </span>
+        </label>
         <label className="block">
           Sposób przygotowania
           <textarea

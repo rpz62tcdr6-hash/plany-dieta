@@ -6,6 +6,17 @@ import { href, navigate } from '../router'
 import { newId, useStore } from '../store'
 import type { MealType, Recipe } from '../types'
 
+/** Zwraca link tylko, jeśli to adres http(s) – nie otwieramy innych schematów */
+export function safeLink(link?: string): string | undefined {
+  if (!link) return undefined
+  try {
+    const url = new URL(link)
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : undefined
+  } catch {
+    return undefined
+  }
+}
+
 export function RecipeTags({ recipe }: { recipe: Recipe }) {
   const { data } = useStore()
   const t = recipeTags(recipe, new Map(data.foods.map((f) => [f.id, f])))
@@ -19,6 +30,7 @@ export function RecipeTags({ recipe }: { recipe: Recipe }) {
       {t.vegetarian && <span className="tag green">wege</span>}
       {t.noLactose && <span className="tag outline">bez laktozy</span>}
       {t.noGluten && <span className="tag outline">bez glutenu</span>}
+      {safeLink(recipe.link) && <span className="tag video">▶ wideo</span>}
     </span>
   )
 }

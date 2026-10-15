@@ -143,6 +143,8 @@ export interface Recipe {
   mealTypes: MealType[]
   ingredients: Ingredient[]
   instructions: string
+  /** Link do filmu z przepisem (TikTok, Instagram, YouTube…) */
+  link?: string
 }
 
 export interface MealItem {

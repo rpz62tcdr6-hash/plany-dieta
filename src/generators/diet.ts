@@ -183,8 +183,7 @@ export interface DietParams {
   prefs: DietPrefs
 }
 
-export function generateMeals(params: DietParams, recipes: Recipe[], foodsList: Food[]): { meals: Meal[]; missing: string[] } {
-  const foods: FoodMap = new Map(foodsList.map((f) => [f.id, f]))
+function buildMeals(params: DietParams, recipes: Recipe[], foods: FoodMap): { meals: Meal[]; missing: string[] } {
   const layout = MEAL_LAYOUTS[params.mealsCount] ?? MEAL_LAYOUTS[5]
   const used: string[] = []
   const families: string[] = []
@@ -201,16 +200,38 @@ export function generateMeals(params: DietParams, recipes: Recipe[], foodsList: 
     used.push(recipe.id)
     families.push(proteinFamily(recipe, foods))
     const meal = mealFromRecipe(recipe, base)
-    return { ...meal, items: fitItems(meal.items, { ...target, protein: 0, carbs: 0, fat: 0 }, foods) }
+    return { ...meal, items: fitItems(meal.items, target, foods) }
   })
 
   // Korekta całego dnia, żeby suma makro trafiła w cel
-  const all = meals.flatMap((m) => m.items)
-  const fitted = fitItems(all, params.target, foods)
+  const fitted = fitItems(meals.flatMap((m) => m.items), params.target, foods)
   const byId = new Map(fitted.map((i) => [i.id, i]))
-  meals = meals.map((m) => ({ ...m, items: m.items.map((i) => byId.get(i.id) ?? i) }))
-
+  meals = meals.map((m) => ({ ...m, items: m.items.map((i) => byId.get(i.id)).filter((i): i is MealItem => !!i) }))
   return { meals, missing }
+}
+
+/** Względny błąd dnia względem celu (0 = idealnie) */
+function dayError(meals: Meal[], target: Macros, foods: FoodMap): number {
+  const day = sumMacros(meals.flatMap((m) => m.items.map((i) => foodMacros(foods.get(i.foodId), i.grams))))
+  return (['kcal', 'protein', 'carbs', 'fat'] as const)
+    .filter((k) => target[k] > 0)
+    .reduce((err, k) => err + Math.abs(day[k] - target[k]) / target[k], 0)
+}
+
+/** Losuje kilka zestawów przepisów i wybiera ten, który najlepiej trafia w cel */
+export function generateMeals(params: DietParams, recipes: Recipe[], foodsList: Food[]): { meals: Meal[]; missing: string[] } {
+  const foods: FoodMap = new Map(foodsList.map((f) => [f.id, f]))
+  let best = buildMeals(params, recipes, foods)
+  let bestErr = dayError(best.meals, params.target, foods)
+  for (let attempt = 1; attempt < 12 && bestErr > 0.04; attempt++) {
+    const next = buildMeals(params, recipes, foods)
+    const err = dayError(next.meals, params.target, foods)
+    if (err < bestErr) {
+      best = next
+      bestErr = err
+    }
+  }
+  return best
 }
 
 /**

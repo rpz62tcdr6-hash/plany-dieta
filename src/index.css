@@ -487,3 +487,7 @@ details.fold[open] > summary { padding-bottom: 0.9rem; margin-bottom: 0.9rem; bo
   .edit-table .goal-row { padding: 0.3rem 0.6rem; }
   .edit-table .goal-row td:first-child { grid-column: 1 / -1; }
 }
+
+.link-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+.tag.video { background: var(--red); }
+.video-link { margin-left: 0.6rem; font-size: 0.85rem; font-weight: 800; }

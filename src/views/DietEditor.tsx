@@ -6,6 +6,7 @@ import { MacroSummary } from '../components/MacroSummary'
 import { NumberInput } from '../components/NumberInput'
 import { ProteinBadge } from '../components/ProteinBadge'
 import { MEAL_TYPE_LABELS } from '../data/recipes'
+import { safeLink } from './Recipes'
 import {
   NO_PREFS,
   fitItems,
@@ -209,6 +210,14 @@ export function DietEditor({ id }: { id: string }) {
                   <>
                     <span className="eyebrow">Przepis</span>
                     <strong>{meal.recipeName}</strong>
+                    {(() => {
+                      const link = safeLink(data.recipes.find((r) => r.id === meal.recipeId)?.link)
+                      return link ? (
+                        <a className="video-link" href={link} target="_blank" rel="noopener noreferrer">
+                          ▶ wideo
+                        </a>
+                      ) : null
+                    })()}
                   </>
                 ) : (
                   <span className="muted">Bez przepisu – dobierz lub dodaj produkty ręcznie</span>

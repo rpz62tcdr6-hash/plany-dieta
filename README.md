@@ -11,7 +11,7 @@ Aplikacja dla trenera personalnego do tworzenia **planów treningowych** i **die
   i przerwami. Każde ćwiczenie podmienisz jednym kliknięciem (⇄) na podobne.
 - **Generator diet** – wpisujesz kcal i makro, liczbę posiłków i preferencje (wege, bez laktozy, bez glutenu),
   a aplikacja dobiera przepisy i przelicza gramatury tak, żeby trafić w cel.
-- **Przepisy** – baza 40 przepisów + własne przepisy.
+- **Przepisy** – baza 92 przepisów (w tym fit przepisy w stylu TikToka) + własne przepisy z linkiem do wideo.
 - **PDF** – czytelny wydruk planu i diety do wysłania podopiecznemu („Podgląd / PDF” → „Zapisz jako PDF”).
 - **Biblioteka** – własne ćwiczenia i produkty (wartości na 100 g).
 - **Kopia zapasowa** – eksport / import wszystkich danych do pliku.
