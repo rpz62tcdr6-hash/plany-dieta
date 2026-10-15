@@ -1,4 +1,5 @@
 import { fmt, foodMacros, formatDate, sumMacros } from '../calc'
+import { PrintNotes } from '../components/PrintNotes'
 import { href } from '../router'
 import { useStore } from '../store'
 import type { MealItem } from '../types'
@@ -29,18 +30,30 @@ export function PrintDiet({ id }: { id: string }) {
         <p>
           {client && <strong>{client.name}</strong>} · {formatDate(new Date().toISOString())}
         </p>
-        <p>
-          Dziennie: <strong>{fmt(day.kcal)} kcal</strong> · białko {fmt(day.protein)} g · węglowodany{' '}
-          {fmt(day.carbs)} g · tłuszcze {fmt(day.fat)} g
-          {target.kcal > 0 && (
-            <span className="muted">
-              {' '}
-              (cel: {fmt(target.kcal)} kcal, B {target.protein} g, W {target.carbs} g, T {target.fat} g)
-            </span>
-          )}
-        </p>
       </header>
-      {diet.notes && <p className="print-notes">{diet.notes}</p>}
+      <div className="print-macros">
+        {(
+          [
+            ['Kalorie', day.kcal, target.kcal, 'kcal'],
+            ['Białko', day.protein, target.protein, 'g'],
+            ['Węglowodany', day.carbs, target.carbs, 'g'],
+            ['Tłuszcze', day.fat, target.fat, 'g'],
+          ] as const
+        ).map(([label, value, goal, unit]) => (
+          <div key={label} className="print-macro">
+            <span>{label}</span>
+            <strong>
+              {fmt(value)} <small>{unit}</small>
+            </strong>
+            {goal > 0 && (
+              <em>
+                cel {fmt(goal)} {unit}
+              </em>
+            )}
+          </div>
+        ))}
+      </div>
+      {diet.notes && <PrintNotes text={diet.notes} title="Zalecenia" />}
 
       {diet.meals.map((meal, mi) => (
         <section key={meal.id} className="print-section">

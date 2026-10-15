@@ -56,7 +56,8 @@ function migrate(raw: Partial<AppData>): AppData {
     return { ...rest, target }
   })
 
-  data.plans = data.plans.map(migrateLegacyLog)
+  data.plans = data.plans.map(migrateLegacyLog).map((p) => ({ ...p, notes: p.notes.replace('RIR = ile', 'RIR: ile') }))
+  data.diets = data.diets.map((d) => ({ ...d, notes: d.notes.replace('Białko rozkładaj równomiernie', 'Białko: rozkładaj równomiernie') }))
 
   data.seedVersion = SEED_VERSION
   return data

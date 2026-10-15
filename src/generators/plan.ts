@@ -351,7 +351,7 @@ export function generatePlan(
     '',
     'Rozgrzewka: 5–10 min lekkiego cardio + 1–2 serie rozgrzewkowe przed pierwszym ćwiczeniem.',
     'Progresja: gdy we wszystkich seriach zrobisz górny zakres powtórzeń przy zadanym RIR, zwiększ ciężar o 2–10% (ACSM 2009).',
-    'RIR = ile powtórzeń „zostaje w zapasie” do upadku mięśniowego.',
+    'RIR: ile powtórzeń „zostaje w zapasie” do upadku mięśniowego.',
     '',
     'Zasady (na podstawie badań):',
     '• Każda partia trenowana min. 2× w tygodniu (Schoenfeld i wsp., Sports Med 2016).',

@@ -495,3 +495,55 @@ details.fold[open] > summary { padding-bottom: 0.9rem; margin-bottom: 0.9rem; bo
 .client-macros { border-top: 1px solid var(--border); margin-top: 1rem; padding-top: 1rem; }
 .client-macros h3 { margin-top: 0; }
 .ok-text { color: #111; font-weight: 700; }
+
+/* ——— PDF: sekcje informacyjne ——— */
+.print-info { margin: 0 0 1.25rem; border: 2px solid var(--black); border-radius: 12px; overflow: hidden; break-inside: avoid; }
+.print-info-title {
+  margin: 0; padding: 0.55rem 0.9rem; background: var(--black); color: #fff; font-size: 0.85rem;
+  border-bottom: 3px solid var(--red);
+}
+.print-info-section { padding: 0.75rem 0.9rem; border-top: 1px solid var(--border); }
+.print-info-title + .print-info-section { border-top: none; }
+.print-info-section.note { background: var(--red-soft); border-left: 5px solid var(--red); }
+.print-info-label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--red); margin-bottom: 0.25rem; }
+.info-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 0.2rem 0; }
+.info-table th {
+  width: 30%; text-align: left; vertical-align: top; padding: 0.4rem 0.6rem; background: #f4f4f4; color: var(--black);
+  font-weight: 800; border-bottom: 1px solid #fff; border-left: 4px solid var(--red);
+}
+.info-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); }
+.info-heading { margin: 0.2rem 0 0.4rem; color: var(--red); font-size: 0.78rem; }
+.info-list { list-style: none; margin: 0; padding: 0; font-size: 0.9rem; }
+.info-list li { position: relative; padding: 0.3rem 0 0.3rem 1.1rem; border-bottom: 1px dashed var(--border); }
+.info-list li:last-child { border-bottom: none; }
+.info-list li::before { content: ''; position: absolute; left: 0; top: 0.72rem; width: 7px; height: 7px; background: var(--red); }
+.info-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.4rem 0; }
+.info-chips span { background: var(--black); color: #fff; font-size: 0.78rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; }
+.info-text { margin: 0.2rem 0; font-size: 0.92rem; white-space: pre-wrap; }
+
+.print-macros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin: 0 0 1.25rem; break-inside: avoid; }
+.print-macro { background: var(--black); color: #fff; border-radius: 12px; padding: 0.7rem 0.85rem; border-bottom: 4px solid var(--red); }
+.print-macro span { display: block; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #bdbdbd; }
+.print-macro strong { font-size: 1.45rem; font-weight: 900; }
+.print-macro small { font-size: 0.8rem; font-weight: 600; }
+.print-macro em { display: block; font-style: normal; font-size: 0.75rem; color: #ff6b65; font-weight: 700; }
+
+.print-table .ex-name { font-weight: 700; }
+.print-table .strong { font-weight: 800; }
+.num-badge {
+  display: inline-grid; place-items: center; width: 1.45rem; height: 1.45rem; border-radius: 50%;
+  background: var(--red); color: #fff; font-size: 0.72rem; font-weight: 800;
+}
+.print-section h2 .print-kcal { font-size: 0.8rem; }
+
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .print-info, .print-macros, .print-table tr { break-inside: avoid; }
+}
+@media (max-width: 600px) {
+  .print-page { padding: 1rem; }
+  .print-header { margin: -1rem -1rem 1rem; padding: 1.25rem 1rem 1rem; }
+  .print-macros { grid-template-columns: repeat(2, 1fr); }
+  .print-table { font-size: 0.8rem; }
+  .info-table th { width: 38%; }
+}

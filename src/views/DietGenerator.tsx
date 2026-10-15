@@ -11,7 +11,7 @@ import type { Diet, DietPrefs, Macros } from '../types'
 function dietNotes(sex: 'M' | 'K'): string {
   return [
     `Nawodnienie: ok. ${sex === 'K' ? '2,0' : '2,5'} l wody dziennie (z napojów i jedzenia) + uzupełnianie strat potu na treningu (EFSA 2010).`,
-    'Białko rozkładaj równomiernie – ok. 0,25–0,4 g/kg masy ciała w każdym głównym posiłku, co 3–4 h (ISSN 2017; Schoenfeld i Aragon 2018).',
+    'Białko: rozkładaj równomiernie – ok. 0,25–0,4 g/kg masy ciała w każdym głównym posiłku, co 3–4 h (ISSN 2017; Schoenfeld i Aragon 2018).',
     'Warzywa i owoce: min. 400 g dziennie (WHO); błonnik ok. 25 g dziennie (EFSA).',
     'Kontrola: waż się 3–4× w tygodniu rano i patrz na średnią tygodniową – na redukcji celuj w spadek 0,5–1% masy ciała tygodniowo.',
   ].join('\n')

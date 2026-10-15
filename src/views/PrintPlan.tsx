@@ -1,4 +1,6 @@
 import { formatDate } from '../calc'
+import { PrintNotes } from '../components/PrintNotes'
+import { estimateMinutes } from '../generators/volume'
 import { formatSets, previousFor } from '../sessions'
 import type { PlanExercise } from '../types'
 import { href } from '../router'
@@ -32,11 +34,16 @@ export function PrintPlan({ id }: { id: string }) {
           {client && <strong>{client.name}</strong>} · {formatDate(new Date().toISOString())}
         </p>
       </header>
-      {plan.notes && <p className="print-notes">{plan.notes}</p>}
+      {plan.notes && <PrintNotes text={plan.notes} title="Założenia i zasady" />}
 
       {plan.days.map((day) => (
         <section key={day.id} className="print-section">
-          <h2>{day.name}</h2>
+          <h2>
+            {day.name}
+            <span className="print-kcal">
+              {day.exercises.length} ćw. · ok. {estimateMinutes(day.exercises, data.exercises)} min
+            </span>
+          </h2>
           {day.exercises.length === 0 ? (
             <p className="muted">Brak ćwiczeń.</p>
           ) : (
@@ -56,10 +63,12 @@ export function PrintPlan({ id }: { id: string }) {
               <tbody>
                 {day.exercises.map((ex, i) => (
                   <tr key={ex.id}>
-                    <td>{i + 1}</td>
-                    <td>{exName(ex.exerciseId)}</td>
-                    <td>{ex.sets}</td>
-                    <td>{ex.reps}</td>
+                    <td>
+                      <span className="num-badge">{i + 1}</span>
+                    </td>
+                    <td className="ex-name">{exName(ex.exerciseId)}</td>
+                    <td className="strong">{ex.sets}</td>
+                    <td className="strong">{ex.reps}</td>
                     <td>{ex.weight}</td>
                     {hasLog && <td>{lastLog(ex)}</td>}
                     <td>{ex.rest}</td>
