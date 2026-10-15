@@ -103,31 +103,30 @@ export function pickRecipe(
     .sort((a, b) => a.score - b.score)[0].r
 }
 
-type Group = 'protein' | 'carbs' | 'fat' | 'fixed'
+type Kind = 'fixed' | 'fat' | 'main'
 
-/** Do której „grupy” należy produkt – po tym dobieramy, co zwiększyć lub zmniejszyć */
-function groupOf(food: Food | undefined): Group {
-  if (!food || food.kcal < 50) return 'fixed' // warzywa i dodatki zostają bez zmian
-  const p = food.protein * 4
-  const c = food.carbs * 4
-  const f = food.fat * 9
-  const total = p + c + f || 1
-  if (p / total >= 0.3) return 'protein'
-  if (f / total >= 0.5) return 'fat'
-  return 'carbs'
+/** Warzywa i dodatki zmieniamy niewiele, tłuszcze (oliwa, masło) mogą zejść prawie do zera */
+function kindOf(food: Food | undefined): Kind {
+  if (!food || food.kcal < 50) return 'fixed'
+  const total = food.protein * 4 + food.carbs * 4 + food.fat * 9 || 1
+  return (food.fat * 9) / total >= 0.6 && food.protein * 4 < total * 0.2 ? 'fat' : 'main'
 }
 
+const BOUNDS: Record<Kind, [number, number]> = { fixed: [0.6, 1.5], fat: [0, 2.5], main: [0.3, 2.5] }
+
 function roundGrams(g: number): number {
+  if (g < 2) return 0
   return g >= 20 ? Math.round(g / 5) * 5 : Math.max(1, Math.round(g))
 }
 
 /**
- * Dopasowuje gramatury do celu: osobno skaluje źródła białka, węglowodanów i tłuszczu,
- * aż suma makro będzie jak najbliżej celu. Warzywa zostają bez zmian.
+ * Dopasowuje gramatury do celu. Dla każdego produktu szukamy mnożnika (w granicach rozsądku),
+ * który minimalizuje odchylenie kcal i makro od celu, z lekką karą za odejście od proporcji przepisu
+ * (metoda spadku po współrzędnych dla zadania najmniejszych kwadratów z ograniczeniami).
  */
 export function fitItems(items: MealItem[], target: Macros, foods: FoodMap): MealItem[] {
-  const total = () => sumMacros(items.map((i) => foodMacros(foods.get(i.foodId), i.grams)))
   if (items.length === 0) return items
+  const total = () => sumMacros(items.map((i) => foodMacros(foods.get(i.foodId), i.grams)))
 
   // 1) skalowanie całości do kalorii
   const kcal = total().kcal
@@ -136,24 +135,32 @@ export function fitItems(items: MealItem[], target: Macros, foods: FoodMap): Mea
     items = items.map((i) => ({ ...i, grams: i.grams * k }))
   }
 
-  // 2) korekta makro (gdy cel makro jest podany)
-  if (target.protein > 0 || target.carbs > 0 || target.fat > 0) {
-    const base = items.map((i) => i.grams)
-    const groups = items.map((i) => groupOf(foods.get(i.foodId)))
-    const factor: Record<Group, number> = { protein: 1, carbs: 1, fat: 1, fixed: 1 }
-    const compute = () =>
-      sumMacros(items.map((it, n) => foodMacros(foods.get(it.foodId), base[n] * factor[groups[n]])))
-    for (let iter = 0; iter < 60; iter++) {
-      const t = compute()
-      for (const g of ['protein', 'carbs', 'fat'] as const) {
-        if (!groups.includes(g) || !(target[g] > 0) || !(t[g] > 0)) continue
-        factor[g] = Math.min(2.5, Math.max(0.4, factor[g] * Math.pow(target[g] / t[g], 0.5)))
+  // 2) dopasowanie makro produkt po produkcie
+  const keys = (['kcal', 'protein', 'carbs', 'fat'] as const).filter((k) => target[k] > 0)
+  if (keys.some((k) => k !== 'kcal')) {
+    const weight: Record<keyof Macros, number> = { kcal: 1, protein: 1.5, carbs: 1, fat: 1 }
+    const base = items.map((i) => foodMacros(foods.get(i.foodId), i.grams))
+    const bounds = items.map((i) => BOUNDS[kindOf(foods.get(i.foodId))])
+    const x = items.map(() => 1)
+    const lambda = 0.01
+    const sumOf = (k: keyof Macros) => base.reduce((acc, m, i) => acc + m[k] * x[i], 0)
+    for (let sweep = 0; sweep < 150; sweep++) {
+      for (let i = 0; i < items.length; i++) {
+        let num = lambda
+        let den = lambda
+        for (const k of keys) {
+          const a = base[i][k] / target[k]
+          const rest = (sumOf(k) - base[i][k] * x[i]) / target[k] - 1
+          num -= weight[k] * a * rest
+          den += weight[k] * a * a
+        }
+        x[i] = Math.min(bounds[i][1], Math.max(bounds[i][0], num / den))
       }
     }
-    items = items.map((it, n) => ({ ...it, grams: base[n] * factor[groups[n]] }))
+    items = items.map((it, i) => ({ ...it, grams: it.grams * x[i] }))
   }
 
-  return items.map((i) => ({ ...i, grams: roundGrams(i.grams) }))
+  return items.map((i) => ({ ...i, grams: roundGrams(i.grams) })).filter((i) => i.grams > 0)
 }
 
 export function mealTarget(dayTarget: Macros, share: number): Macros {
@@ -206,10 +213,52 @@ export function generateMeals(params: DietParams, recipes: Recipe[], foodsList: 
   return { meals, missing }
 }
 
-/** Nowy przepis dla jednego posiłku, dopasowany do jego części dziennego celu */
+/**
+ * Cel dla jednego posiłku tak, żeby suma dnia trafiła w cel: od celu dnia odejmujemy pozostałe posiłki.
+ * Wynik ograniczamy do 0,5–1,6× „normalnej” porcji posiłku, żeby nie wyszły absurdalne ilości.
+ */
+export function remainingTarget(dayTarget: Macros, meals: Meal[], mealId: string, share: number, foods: FoodMap): Macros {
+  const others = sumMacros(
+    meals.filter((m) => m.id !== mealId).flatMap((m) => m.items.map((i) => foodMacros(foods.get(i.foodId), i.grams))),
+  )
+  const base = mealTarget(dayTarget, share)
+  const pick = (key: keyof Macros) => {
+    const rest = dayTarget[key] - others[key]
+    if (!(base[key] > 0)) return Math.max(0, rest)
+    return Math.min(base[key] * 1.6, Math.max(base[key] * 0.5, rest))
+  }
+  return { kcal: pick('kcal'), protein: pick('protein'), carbs: pick('carbs'), fat: pick('fat') }
+}
+
+/**
+ * Dopasowuje gramatury zmienionego posiłku. Jeśli sam posiłek nie wystarczy (np. brak w nim źródła węglowodanów),
+ * a dzień odbiega od celu o więcej niż 5%, delikatnie korygujemy też pozostałe posiłki.
+ */
+export function fitMealInDay(
+  meals: Meal[],
+  mealId: string,
+  dayTarget: Macros,
+  shareOf: (m: Meal) => number,
+  foods: FoodMap,
+): { meals: Meal[]; adjustedOthers: boolean } {
+  let next = meals.map((m) =>
+    m.id === mealId ? { ...m, items: fitItems(m.items, remainingTarget(dayTarget, meals, m.id, shareOf(m), foods), foods) } : m,
+  )
+  const day = sumMacros(next.flatMap((m) => m.items.map((i) => foodMacros(foods.get(i.foodId), i.grams))))
+  const off = (['kcal', 'protein', 'carbs', 'fat'] as const).some(
+    (k) => dayTarget[k] > 0 && Math.abs(day[k] - dayTarget[k]) / dayTarget[k] > 0.05,
+  )
+  if (!off) return { meals: next, adjustedOthers: false }
+  const fitted = fitItems(next.flatMap((m) => m.items), dayTarget, foods)
+  const byId = new Map(fitted.map((i) => [i.id, i]))
+  next = next.map((m) => ({ ...m, items: m.items.map((i) => byId.get(i.id)).filter((i): i is MealItem => !!i) }))
+  return { meals: next, adjustedOthers: true }
+}
+
+/** Nowy przepis dla jednego posiłku, z gramaturą dopasowaną do podanego celu posiłku */
 export function rerollMeal(
   meal: Meal,
-  dayTarget: Macros,
+  target: Macros,
   share: number,
   recipes: Recipe[],
   foodsList: Food[],
@@ -217,7 +266,6 @@ export function rerollMeal(
   recipeId?: string,
 ): Meal | null {
   const foods: FoodMap = new Map(foodsList.map((f) => [f.id, f]))
-  const target = mealTarget(dayTarget, share)
   const recipe = recipeId
     ? recipes.find((r) => r.id === recipeId)
     : pickRecipe(recipes, foods, meal.type, target, prefs, meal.recipeId ? [meal.recipeId] : [])

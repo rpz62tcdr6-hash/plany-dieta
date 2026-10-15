@@ -6,7 +6,16 @@ import { MacroSummary } from '../components/MacroSummary'
 import { NumberInput } from '../components/NumberInput'
 import { ProteinBadge } from '../components/ProteinBadge'
 import { MEAL_TYPE_LABELS } from '../data/recipes'
-import { NO_PREFS, fitItems, generateMeals, recipeAllowed, recipeMacros, rerollMeal } from '../generators/diet'
+import {
+  NO_PREFS,
+  fitItems,
+  generateMeals,
+  recipeAllowed,
+  recipeMacros,
+  fitMealInDay,
+  remainingTarget,
+  rerollMeal,
+} from '../generators/diet'
 import { href } from '../router'
 import { move, newId, useStore } from '../store'
 import type { Diet, Meal, MealItem } from '../types'
@@ -45,19 +54,36 @@ export function DietEditor({ id }: { id: string }) {
     setMeals((meals) => meals.map((m) => (m.id === mealId ? fn(m) : m)))
   }
 
+  /** Zmienia posiłek i od razu przelicza jego gramatury, żeby cały dzień trafił w makro */
+  function changeMealAndFit(mealId: string, fn: (meal: Meal) => Meal) {
+    setMeals((ms) => {
+      const changed = ms.map((m) => (m.id === mealId ? fn(m) : m))
+      return fitMealInDay(changed, mealId, diet!.target, shareOf, foodById).meals
+    })
+  }
+
   function setItem(mealId: string, itemId: string, patch: Partial<MealItem>) {
     setMeal(mealId, (m) => ({ ...m, items: m.items.map((i) => (i.id === itemId ? { ...i, ...patch } : i)) }))
   }
 
+  function changeFood(mealId: string, itemId: string, foodId: string) {
+    changeMealAndFit(mealId, (m) => ({ ...m, items: m.items.map((i) => (i.id === itemId ? { ...i, foodId } : i)) }))
+  }
+
+  function removeItem(mealId: string, itemId: string) {
+    changeMealAndFit(mealId, (m) => ({ ...m, items: m.items.filter((i) => i.id !== itemId) }))
+  }
+
   function addItem(mealId: string) {
     const item: MealItem = { id: newId(), foodId: data.foods[0]?.id ?? '', grams: 100 }
-    setMeal(mealId, (m) => ({ ...m, items: [...m.items, item] }))
+    changeMealAndFit(mealId, (m) => ({ ...m, items: [...m.items, item] }))
   }
 
   function reroll(meal: Meal, recipeId?: string) {
-    const next = rerollMeal(meal, diet!.target, shareOf(meal), data.recipes, data.foods, prefs, recipeId)
+    const target = remainingTarget(diet!.target, diet!.meals, meal.id, shareOf(meal), foodById)
+    const next = rerollMeal(meal, target, shareOf(meal), data.recipes, data.foods, prefs, recipeId)
     if (!next) return alert('Brak innych pasujących przepisów dla tego posiłku. Dodaj własne w zakładce Przepisy.')
-    setMeal(meal.id, () => next)
+    changeMealAndFit(meal.id, () => next)
   }
 
   function fitDay() {
@@ -127,7 +153,8 @@ export function DietEditor({ id }: { id: string }) {
 
       {diet.meals.map((meal, mi) => {
         const total = mealTotal(meal)
-        const goalKcal = diet.target.kcal * shareOf(meal)
+        const mealGoal = remainingTarget(diet.target, diet.meals, meal.id, shareOf(meal), foodById)
+        const goalKcal = mealGoal.kcal
         const options = data.recipes
           .filter((r) => (!meal.type || r.mealTypes.includes(meal.type)) && recipeAllowed(r, foodById, prefs))
           .sort((a, b) => a.name.localeCompare(b.name, 'pl'))
@@ -147,6 +174,13 @@ export function DietEditor({ id }: { id: string }) {
                 <ProteinBadge protein={total.protein} weightKg={client?.weightKg ?? 0} snack={meal.type === 'przekaska'} />
               </div>
               <span className="actions">
+                <button
+                  title="Dopasuj gramatury w tym posiłku, żeby dzień trafił w makro"
+                  disabled={meal.items.length === 0}
+                  onClick={() => changeMealAndFit(meal.id, (m) => m)}
+                >
+                  ⚖ Dopasuj
+                </button>
                 <button disabled={mi === 0} onClick={() => setMeals((ms) => move(ms, mi, -1))} title="W górę">
                   ↑
                 </button>
@@ -239,7 +273,7 @@ export function DietEditor({ id }: { id: string }) {
                             <FoodSelect
                               foods={data.foods}
                               value={item.foodId}
-                              onChange={(foodId) => setItem(meal.id, item.id, { foodId })}
+                              onChange={(foodId) => changeFood(meal.id, item.id, foodId)}
                             />
                           </td>
                           <td data-label="Gramy">
@@ -266,9 +300,7 @@ export function DietEditor({ id }: { id: string }) {
                             <button
                               className="danger"
                               title="Usuń"
-                              onClick={() =>
-                                setMeal(meal.id, (x) => ({ ...x, items: x.items.filter((i) => i.id !== item.id) }))
-                              }
+                              onClick={() => removeItem(meal.id, item.id)}
                             >
                               ✕
                             </button>
@@ -290,6 +322,23 @@ export function DietEditor({ id }: { id: string }) {
                       </td>
                       <td className="num" data-label="T">
                         {fmt(total.fat, 1)}
+                      </td>
+                      <td></td>
+                    </tr>
+                    <tr className="goal-row">
+                      <td>Cel posiłku</td>
+                      <td></td>
+                      <td className="num" data-label="kcal">
+                        {fmt(mealGoal.kcal)}
+                      </td>
+                      <td className="num" data-label="B">
+                        {fmt(mealGoal.protein)}
+                      </td>
+                      <td className="num" data-label="W">
+                        {fmt(mealGoal.carbs)}
+                      </td>
+                      <td className="num" data-label="T">
+                        {fmt(mealGoal.fat)}
                       </td>
                       <td></td>
                     </tr>
