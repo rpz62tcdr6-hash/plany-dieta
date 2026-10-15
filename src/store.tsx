@@ -3,7 +3,7 @@ import { macroTargets } from './calc'
 import { defaultExercises } from './data/exercises'
 import { defaultFoods } from './data/foods'
 import { defaultRecipes } from './data/recipes'
-import type { AppData, Diet } from './types'
+import type { AppData, Diet, TrainingPlan, WorkoutSession } from './types'
 
 const STORAGE_KEY = 'apka-plany-dieta:v1'
 /** Podbij, gdy dochodzą nowe wbudowane ćwiczenia/produkty/przepisy */
@@ -56,8 +56,38 @@ function migrate(raw: Partial<AppData>): AppData {
     return { ...rest, target }
   })
 
+  data.plans = data.plans.map(migrateLegacyLog)
+
   data.seedVersion = SEED_VERSION
   return data
+}
+
+/** Stare pojedyncze wpisy ciężaru zamieniamy na zapisane treningi (jeden trening na dzień planu i datę) */
+function migrateLegacyLog(plan: TrainingPlan): TrainingPlan {
+  if (!plan.days.some((d) => d.exercises.some((e) => e.log?.length))) return plan
+  const sessions: WorkoutSession[] = [...(plan.sessions ?? [])]
+  const days = plan.days.map((day) => ({
+    ...day,
+    exercises: day.exercises.map((pe) => {
+      for (const entry of pe.log ?? []) {
+        let session = sessions.find((s) => s.dayId === day.id && s.date === entry.date)
+        if (!session) {
+          session = { id: newId(), dayId: day.id, date: entry.date, exercises: [], note: '' }
+          sessions.push(session)
+        }
+        let ex = session.exercises.find((x) => x.planExerciseId === pe.id)
+        if (!ex) {
+          ex = { planExerciseId: pe.id, exerciseId: pe.exerciseId, sets: [] }
+          session.exercises.push(ex)
+        }
+        ex.sets.push({ weight: entry.weight, reps: Number.parseInt(entry.reps) || null })
+      }
+      const rest = { ...pe }
+      delete rest.log
+      return rest
+    }),
+  }))
+  return { ...plan, days, sessions }
 }
 
 function load(): AppData {

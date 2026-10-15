@@ -377,10 +377,26 @@ export function generatePlan(
   }
 }
 
-/** Losuje inne ćwiczenie o tym samym wzorcu ruchowym */
+const EQUIPMENT_CLASS: Record<Equipment, string> = {
+  sztanga: 'silownia',
+  maszyna: 'silownia',
+  wyciąg: 'silownia',
+  hantle: 'wolne',
+  kettlebell: 'wolne',
+  'masa ciała': 'masa',
+  guma: 'masa',
+}
+
+/** Losuje inne ćwiczenie o tym samym wzorcu ruchowym – najchętniej na podobnym sprzęcie */
 export function swapExercise(current: Exercise | undefined, exercises: Exercise[], exclude: string[]): Exercise | null {
   if (!current?.pattern) return null
   const pool = exercises.filter((e) => e.pattern === current.pattern && e.id !== current.id && !exclude.includes(e.id))
   if (pool.length === 0) return null
-  return pool[Math.floor(Math.random() * pool.length)]
+  const cls = current.equipment ? EQUIPMENT_CLASS[current.equipment] : ''
+  const score = (e: Exercise) =>
+    (e.equipment && EQUIPMENT_CLASS[e.equipment] === cls ? 1 : 0) +
+    (e.equipment === current.equipment ? 0.3 : 0) +
+    (e.compound === current.compound ? 0.3 : 0) +
+    Math.random() * 0.9
+  return pool.map((e) => ({ e, s: score(e) })).sort((a, b) => b.s - a.s)[0].e
 }

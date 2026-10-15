@@ -51,7 +51,29 @@ export interface Exercise {
   stress?: Joint[]
 }
 
-/** Zapis wykonania – ciężar i powtórzenia z danego dnia */
+/** Pojedyncza seria zapisana na treningu (puste = nie wpisano) */
+export interface SetEntry {
+  weight: number | null
+  reps: number | null
+}
+
+export interface SessionExercise {
+  planExerciseId: string
+  exerciseId: string
+  sets: SetEntry[]
+}
+
+/** Zapisany trening – jeden dzień planu wykonany konkretnego dnia */
+export interface WorkoutSession {
+  id: string
+  dayId: string
+  /** Data w formacie RRRR-MM-DD */
+  date: string
+  exercises: SessionExercise[]
+  note: string
+}
+
+/** Stary format zapisu (przed zapisem całych treningów) – zamieniany na WorkoutSession przy wczytaniu */
 export interface LogEntry {
   id: string
   /** Data w formacie RRRR-MM-DD */
@@ -90,6 +112,7 @@ export interface TrainingPlan {
   /** Cel i poziom – punkt odniesienia dla zaleceń objętości */
   goal?: TrainingGoal
   level?: Level
+  sessions?: WorkoutSession[]
   createdAt: string
 }
 

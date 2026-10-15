@@ -413,3 +413,71 @@ details.fold[open] > summary { padding-bottom: 0.9rem; margin-bottom: 0.9rem; bo
 
 .section-head .actions select { width: auto; }
 .volume-fill { top: 2px; bottom: 2px; z-index: 1; }
+
+/* ——— Treningi (akordeon) ——— */
+.training { border: 1.5px solid var(--border); border-radius: 12px; margin-bottom: 0.6rem; overflow: hidden; background: var(--surface); }
+.training.open { border-color: var(--black); }
+.training-head {
+  width: 100%; display: flex; align-items: center; gap: 0.75rem; text-align: left; white-space: normal;
+  border: none; border-radius: 0; padding: 0.9rem 1rem; background: var(--surface);
+}
+.training-head:hover { background: #fafafa; border: none; }
+.training.open .training-head { background: var(--black); color: #fff; }
+.training.open .training-head .muted { color: #bdbdbd; }
+.training.open .training-head .badge.dark { background: var(--red); border-color: var(--red); }
+.training-arrow { color: var(--red); font-size: 1.1rem; width: 1rem; }
+.training-title { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.training-title strong { font-size: 1.08rem; font-weight: 900; }
+.training-body { padding: 0.9rem 1rem 1rem; }
+.training-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.ex-last strong { text-align: right; }
+.ex-last .up { color: #111; }
+
+.history { margin-top: 1.2rem; }
+.history h3 { margin: 0 0 0.4rem; }
+.history-item { border-top: 1px solid var(--border); }
+.history-head {
+  width: 100%; display: flex; align-items: center; gap: 0.75rem; border: none; border-radius: 0; padding: 0.6rem 0;
+  background: none; text-align: left; white-space: normal;
+}
+.history-head:hover { border: none; background: none; }
+.history-head .muted { flex: 1; }
+.history-body { padding: 0 0 0.75rem; font-size: 0.9rem; }
+.history-body p { margin: 0.25rem 0; }
+
+/* Zapis treningu */
+.workout-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.workout-head input { width: auto; }
+.workout-ex { border-top: 2px solid var(--black); padding: 0.8rem 0; }
+.workout-ex-head { display: flex; gap: 0.7rem; align-items: flex-start; margin-bottom: 0.5rem; }
+.prev-box {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+  background: var(--red-soft); border: 1px solid #ffd5d2; border-radius: 10px; padding: 0.5rem 0.7rem; font-size: 0.9rem; margin-bottom: 0.5rem;
+}
+.prev-box.empty { background: var(--bg); border-color: var(--border); color: var(--muted); }
+.set-rows { display: flex; flex-direction: column; gap: 0.4rem; }
+.set-row { display: flex; align-items: center; gap: 0.5rem; }
+.set-no { width: 2.4rem; font-weight: 900; font-size: 0.85rem; color: var(--muted); }
+.set-field { position: relative; flex: 0 1 7rem; }
+.set-field input { font-size: 1.1rem; font-weight: 800; padding: 0.5rem 2.6rem 0.5rem 0.6rem; }
+.set-field input::placeholder { color: #b5b5b5; font-weight: 700; }
+.set-field small { position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
+.set-prev { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+.set-tools { display: flex; gap: 1rem; padding-left: 2.9rem; }
+
+/* Edycja ćwiczeń w treningu */
+.edit-ex { border-top: 1px solid var(--border); padding: 0.75rem 0; }
+.edit-ex-top { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.edit-ex-top .swap { padding: 0.4rem 0.7rem; font-size: 1.05rem; }
+.edit-ex-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) 2fr; gap: 0.5rem; }
+.edit-ex-actions { display: flex; gap: 0.4rem; justify-content: flex-end; margin-top: 0.5rem; }
+.day-edit > label.block { margin-bottom: 0.5rem; }
+
+@media (max-width: 700px) {
+  .edit-ex-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .edit-ex-fields .wide-field { grid-column: 1 / -1; }
+  .set-field { flex: 1 1 0; }
+  .set-prev { display: none; }
+  .training-head .badge { display: none; }
+  .ex-last strong { text-align: left; }
+}

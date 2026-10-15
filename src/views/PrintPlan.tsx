@@ -1,4 +1,6 @@
-import { fmt, formatDate } from '../calc'
+import { formatDate } from '../calc'
+import { formatSets, previousFor } from '../sessions'
+import type { PlanExercise } from '../types'
 import { href } from '../router'
 import { useStore } from '../store'
 
@@ -9,10 +11,10 @@ export function PrintPlan({ id }: { id: string }) {
 
   const client = data.clients.find((c) => c.id === plan.clientId)
   const exName = (exId: string) => data.exercises.find((e) => e.id === exId)?.name ?? '—'
-  const hasLog = plan.days.some((d) => d.exercises.some((e) => e.log?.length))
-  const lastLog = (log: { date: string; weight: number; reps: string }[] | undefined) => {
-    const last = [...(log ?? [])].sort((a, b) => a.date.localeCompare(b.date)).pop()
-    return last ? `${fmt(last.weight, last.weight % 1 ? 1 : 0)} kg × ${last.reps}` : ''
+  const hasLog = (plan.sessions ?? []).length > 0
+  const lastLog = (pe: PlanExercise) => {
+    const prev = previousFor(plan, pe)
+    return prev ? formatSets(prev.sets) : ''
   }
 
   return (
@@ -59,7 +61,7 @@ export function PrintPlan({ id }: { id: string }) {
                     <td>{ex.sets}</td>
                     <td>{ex.reps}</td>
                     <td>{ex.weight}</td>
-                    {hasLog && <td>{lastLog(ex.log)}</td>}
+                    {hasLog && <td>{lastLog(ex)}</td>}
                     <td>{ex.rest}</td>
                     <td>{ex.notes}</td>
                   </tr>

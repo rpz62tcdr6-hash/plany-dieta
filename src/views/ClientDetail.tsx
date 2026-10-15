@@ -49,7 +49,7 @@ export function ClientDetail({ id }: { id: string }) {
       name: `${p.name} (kopia)`,
       createdAt: new Date().toISOString(),
     }
-    copy.days.forEach((day) => day.exercises.forEach((e) => delete e.log))
+    copy.sessions = []
     update((d) => ({ ...d, plans: [...d.plans, copy] }))
   }
 
@@ -59,7 +59,7 @@ export function ClientDetail({ id }: { id: string }) {
   }
 
   function removePlan(p: TrainingPlan) {
-    if (confirm(`Usunąć plan „${p.name}” razem z zapisanymi ciężarami?`))
+    if (confirm(`Usunąć plan „${p.name}” razem z historią treningów?`))
       update((d) => ({ ...d, plans: d.plans.filter((x) => x.id !== p.id) }))
   }
 
