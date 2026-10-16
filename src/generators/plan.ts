@@ -16,6 +16,8 @@ export interface PlanParams {
   injuries: Joint[]
   priorities: Priority[]
   notes: string
+  /** Na siłowni wybieraj głównie sztangę i hantle zamiast maszyn */
+  freeWeights?: boolean
 }
 
 export const GOAL_LABELS: Record<TrainingGoal, string> = {
@@ -272,8 +274,16 @@ function balanceVolume(days: PlanDay[], params: PlanParams, exercises: Exercise[
 function shuffleScore(ex: Exercise, params: PlanParams, usedInPlan: Set<string>): number {
   let score = Math.random()
   if (usedInPlan.has(ex.id)) score -= 1
-  if (params.level === 'poczatkujacy' && ex.equipment === 'sztanga') score -= 0.3
-  if (params.level === 'poczatkujacy' && (ex.equipment === 'maszyna' || ex.equipment === 'wyciąg')) score += 0.2
+  if (params.freeWeights && params.equipment === 'silownia') {
+    // Wolne ciężary w pierwszej kolejności; wyciąg zostaje do izolacji, maszyny tylko awaryjnie
+    if (ex.equipment === 'sztanga' || ex.equipment === 'hantle') score += 0.7
+    if (ex.equipment === 'kettlebell') score += 0.2
+    if (ex.equipment === 'maszyna') score -= 0.6
+    if (ex.equipment === 'wyciąg' && ex.compound) score -= 0.2
+  } else {
+    if (params.level === 'poczatkujacy' && ex.equipment === 'sztanga') score -= 0.3
+    if (params.level === 'poczatkujacy' && (ex.equipment === 'maszyna' || ex.equipment === 'wyciąg')) score += 0.2
+  }
   if (params.goal === 'sila' && ex.equipment === 'sztanga') score += 0.6
   // Na siłowni wolimy sprzęt siłowniany od gum i masy ciała, w domu – hantle od gum
   if (params.equipment === 'silownia' && ex.equipment === 'guma') score -= 0.8
@@ -343,7 +353,7 @@ export function generatePlan(
 
   const lines = [
     `Cel: ${GOAL_LABELS[params.goal]} · Poziom: ${LEVEL_LABELS[params.level]}`,
-    `${params.daysPerWeek} treningi/tydz. (${split.name}) · ok. ${params.minutes} min · ${EQUIPMENT_SET_LABELS[params.equipment]}`,
+    `${params.daysPerWeek} treningi/tydz. (${split.name}) · ok. ${params.minutes} min · ${EQUIPMENT_SET_LABELS[params.equipment]}${params.freeWeights && params.equipment === 'silownia' ? ' · wolne ciężary' : ''}`,
   ]
   if (params.injuries.length) lines.push(`Ograniczenia: ${params.injuries.join(', ')} – pominięto ćwiczenia mocno obciążające`)
   if (params.priorities.length) lines.push(`Priorytet: ${params.priorities.join(', ')}`)

@@ -40,7 +40,7 @@ const J: Record<string, Joint> = { k: 'kolano', b: 'bark', l: 'lędźwie' }
 
 // [nazwa, partia, wzorzec, sprzęt, wielostawowe, obciążane stawy (k=kolano, b=bark, l=lędźwie)]
 // Kolejność ma znaczenie – identyfikatory ex-1, ex-2… muszą pozostać stałe.
-const list: [string, string, Pattern, Equipment, boolean, string][] = [
+const list: [string, string, Pattern | null, Equipment, boolean, string][] = [
   ['Wyciskanie sztangi na ławce płaskiej', 'Klatka piersiowa', 'push-h', 'sztanga', true, 'b'],
   ['Wyciskanie hantli na ławce skośnej', 'Klatka piersiowa', 'push-h', 'hantle', true, ''],
   ['Rozpiętki z hantlami', 'Klatka piersiowa', 'chest-iso', 'hantle', false, 'b'],
@@ -181,13 +181,78 @@ const list: [string, string, Pattern, Equipment, boolean, string][] = [
   ['Marsz pod górę na bieżni', 'Cardio', 'cardio', 'maszyna', false, ''],
   ['Mountain climbers', 'Cardio', 'cardio', 'masa ciała', false, ''],
   ['Szybki marsz', 'Cardio', 'cardio', 'masa ciała', false, ''],
+  // — od wersji 5: wolne ciężary i warianty na wyciągach —
+  // Nogi
+  ['Martwy ciąg na prostych nogach', 'Nogi', 'hinge', 'sztanga', true, 'l'],
+  ['Martwy ciąg z hantlami', 'Pośladki', 'hinge', 'hantle', true, ''],
+  ['Martwy ciąg rumuński jednonóż z hantlami', 'Pośladki', 'hinge', 'hantle', true, ''],
+  ['Martwy ciąg sumo z hantlem', 'Pośladki', 'hinge', 'hantle', true, ''],
+  ['Martwy ciąg z deficytu', 'Plecy', 'hinge', 'sztanga', true, 'l'],
+  ['Martwy ciąg z bloków (rack pull)', 'Plecy', 'hinge', 'sztanga', true, ''],
+  ['Przysiad z hantlami', 'Nogi', 'squat', 'hantle', true, ''],
+  ['Przysiad bułgarski ze sztangą', 'Nogi', 'lunge', 'sztanga', true, 'k'],
+  ['Wykroki w tył z hantlami', 'Nogi', 'lunge', 'hantle', true, ''],
+  ['Wykroki chodzone z hantlami', 'Nogi', 'lunge', 'hantle', true, 'k'],
+  ['Wyprosty nóg na maszynie jednonóż', 'Nogi', 'quads', 'maszyna', false, 'k'],
+  ['Uginanie nóg leżąc na maszynie', 'Nogi', 'hamstrings', 'maszyna', false, ''],
+  ['Uginanie nóg stojąc jednonóż na maszynie', 'Nogi', 'hamstrings', 'maszyna', false, ''],
+  ['Uginanie nóg leżąc z hantlem', 'Nogi', 'hamstrings', 'hantle', false, ''],
+  ['Hip thrust jednonóż z hantlem', 'Pośladki', 'glute', 'hantle', false, ''],
+  ['Wspięcia na palce stojąc ze sztangą', 'Nogi', 'calves', 'sztanga', false, ''],
+  // Plecy
+  ['Przyciąganie drążka wyciągu dolnego szerokim chwytem', 'Plecy', 'pull-h', 'wyciąg', true, ''],
+  ['Przyciąganie linki wyciągu dolnego uchwytem V', 'Plecy', 'pull-h', 'wyciąg', true, ''],
+  ['Ściąganie drążka wyciągu górnego szerokim chwytem', 'Plecy', 'pull-v', 'wyciąg', true, ''],
+  ['Ściąganie drążka wyciągu górnego uchwytem V', 'Plecy', 'pull-v', 'wyciąg', true, ''],
+  ['Przyciąganie linki wyciągu górnego jednorącz', 'Plecy', 'pull-v', 'wyciąg', true, ''],
+  ['Przyciąganie linki wyciągu dolnego jednorącz', 'Plecy', 'pull-h', 'wyciąg', true, ''],
+  ['Narciarz na wyciągu', 'Plecy', 'pull-v', 'wyciąg', false, ''],
+  ['Wiosłowanie hantlem jednorącz w podporze o ławkę', 'Plecy', 'pull-h', 'hantle', true, ''],
+  ['Wiosłowanie hantlami w opadzie oburącz', 'Plecy', 'pull-h', 'hantle', true, 'l'],
+  ['Wiosłowanie sztangą podchwytem', 'Plecy', 'pull-h', 'sztanga', true, 'l'],
+  ['Wiosłowanie Pendlay', 'Plecy', 'pull-h', 'sztanga', true, 'l'],
+  ['Podciąganie z obciążeniem', 'Plecy', 'pull-v', 'masa ciała', true, ''],
+  ['Szrugsy z hantlami', 'Plecy', null, 'hantle', false, ''],
+  ['Szrugsy ze sztangą', 'Plecy', null, 'sztanga', false, ''],
+  // Barki
+  ['Dookoła świata z hantlami', 'Barki', 'side-delt', 'hantle', false, 'b'],
+  ['Krucyfiks na wyciągu (odwrotne rozpiętki na bramie)', 'Barki', 'rear-delt', 'wyciąg', false, ''],
+  ['Odwodzenie horyzontalne ramion z hantlami w opadzie', 'Barki', 'rear-delt', 'hantle', false, ''],
+  ['Odwodzenie horyzontalne leżąc przodem na ławce skośnej', 'Barki', 'rear-delt', 'hantle', false, ''],
+  ['Odwodzenie horyzontalne na wyciągu jednorącz', 'Barki', 'rear-delt', 'wyciąg', false, ''],
+  ['Wyciskanie hantli nad głowę stojąc', 'Barki', 'push-v', 'hantle', true, 'b'],
+  ['Wyciskanie hantla jednorącz nad głowę', 'Barki', 'push-v', 'hantle', true, ''],
+  ['Podciąganie sztangi wzdłuż tułowia szerokim chwytem', 'Barki', 'side-delt', 'sztanga', false, 'b'],
+  ['Wznosy bokiem w opadzie z hantlami', 'Barki', 'rear-delt', 'hantle', false, ''],
+  ['Y-raise na ławce skośnej', 'Barki', 'side-delt', 'hantle', false, ''],
+  ['Unoszenie hantli w przód', 'Barki', null, 'hantle', false, ''],
+  // Biceps
+  ['Spider curl (uginanie na ławce skośnej przodem)', 'Biceps', 'biceps', 'hantle', false, ''],
+  ['Uginanie ramion z ramieniem w tyle (Bayesian) na wyciągu', 'Biceps', 'biceps', 'wyciąg', false, ''],
+  ['Uginanie ramion z hantlami naprzemiennie z supinacją', 'Biceps', 'biceps', 'hantle', false, ''],
+  ['Uginanie ramion z hantlem na modlitewniku jednorącz', 'Biceps', 'biceps', 'hantle', false, ''],
+  ['Uginanie ramion Zottmana', 'Biceps', 'biceps', 'hantle', false, ''],
+  ['Uginanie ramion ze sztangą przy tułowiu (drag curl)', 'Biceps', 'biceps', 'sztanga', false, ''],
+  // Triceps
+  ['Wyciskanie francuskie hantla oburącz zza głowy siedząc', 'Triceps', 'triceps', 'hantle', false, ''],
+  ['Wyciskanie francuskie hantli leżąc', 'Triceps', 'triceps', 'hantle', false, ''],
+  ['Wyciskanie francuskie sztangi łamanej na ławce skośnej', 'Triceps', 'triceps', 'sztanga', false, ''],
+  ['Prostowanie ramion z linką wyciągu dolnego nad głową', 'Triceps', 'triceps', 'wyciąg', false, ''],
+  ['Prostowanie ramion z linką na wyciągu górnym', 'Triceps', 'triceps', 'wyciąg', false, ''],
+  ['Prostowanie ramienia na wyciągu jednorącz podchwytem', 'Triceps', 'triceps', 'wyciąg', false, ''],
+  ['Tate press z hantlami', 'Triceps', 'triceps', 'hantle', false, ''],
+  // Klatka
+  ['Wyciskanie hantli na ławce ujemnej', 'Klatka piersiowa', 'push-h', 'hantle', true, ''],
+  ['Wyciskanie sztangi na ławce ujemnej', 'Klatka piersiowa', 'push-h', 'sztanga', true, ''],
+  ['Rozpiętki z hantlami na ławce skośnej', 'Klatka piersiowa', 'chest-iso', 'hantle', false, 'b'],
+  ['Wyciskanie hantli chwytem neutralnym (squeeze press)', 'Klatka piersiowa', 'push-h', 'hantle', true, ''],
 ]
 
 export const defaultExercises: Exercise[] = list.map(([name, muscle, pattern, equipment, compound, stress], i) => ({
   id: `ex-${i + 1}`,
   name,
   muscle,
-  pattern,
+  pattern: pattern ?? undefined,
   equipment,
   compound,
   stress: [...stress].map((c) => J[c]),

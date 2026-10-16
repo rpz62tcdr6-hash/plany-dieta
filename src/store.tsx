@@ -7,7 +7,7 @@ import type { AppData, Diet, TrainingPlan, WorkoutSession } from './types'
 
 const STORAGE_KEY = 'apka-plany-dieta:v1'
 /** Podbij, gdy dochodzą nowe wbudowane ćwiczenia/produkty/przepisy */
-const SEED_VERSION = 4
+const SEED_VERSION = 5
 
 export function emptyData(): AppData {
   return {

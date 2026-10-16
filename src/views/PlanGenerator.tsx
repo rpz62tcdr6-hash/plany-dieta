@@ -30,6 +30,7 @@ export function PlanGenerator({ clientId }: { clientId: string }) {
     injuries: [],
     priorities: [],
     notes: '',
+    freeWeights: true,
   })
 
   if (!client) {
@@ -118,6 +119,19 @@ export function PlanGenerator({ clientId }: { clientId: string }) {
           value={params.equipment}
           onChange={(equipment) => set({ equipment })}
         />
+        {params.equipment === 'silownia' && (
+          <div className="chips" style={{ marginTop: '0.6rem' }}>
+            <button
+              type="button"
+              aria-pressed={!!params.freeWeights}
+              className={`chip ${params.freeWeights ? 'on' : ''}`}
+              onClick={() => set({ freeWeights: !params.freeWeights })}
+            >
+              <span>{params.freeWeights ? '✓ ' : ''}Preferuj wolne ciężary</span>
+              <small>sztanga i hantle zamiast maszyn</small>
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="card step">
