@@ -7,7 +7,7 @@ import type { AppData, Diet, TrainingPlan, WorkoutSession } from './types'
 
 const STORAGE_KEY = 'apka-plany-dieta:v1'
 /** Podbij, gdy dochodzą nowe wbudowane ćwiczenia/produkty/przepisy */
-const SEED_VERSION = 5
+const SEED_VERSION = 6
 
 export function emptyData(): AppData {
   return {
@@ -30,7 +30,9 @@ function migrate(raw: Partial<AppData>): AppData {
   const defEx = new Map(defaultExercises.map((e) => [e.id, e]))
   data.exercises = data.exercises.map((e) => {
     const def = defEx.get(e.id)
-    return def ? { ...def, ...e, pattern: e.pattern ?? def.pattern, equipment: e.equipment ?? def.equipment, compound: e.compound ?? def.compound, stress: e.stress ?? def.stress } : e
+    return def
+      ? { ...def, ...e, name: def.name, muscle: def.muscle, pattern: e.pattern ?? def.pattern, equipment: e.equipment ?? def.equipment, compound: e.compound ?? def.compound, stress: e.stress ?? def.stress }
+      : e
   })
   const defFood = new Map(defaultFoods.map((f) => [f.id, f]))
   data.foods = data.foods.map((f) => ({ ...f, flags: f.flags ?? defFood.get(f.id)?.flags ?? [] }))
