@@ -102,6 +102,8 @@ interface Scheme {
   reps: string
   rest: string
   notes: string
+  tempo: string
+  rir: string
 }
 
 /**
@@ -111,43 +113,48 @@ interface Scheme {
  *   hipertrofia jest podobna w szerokim zakresie ciężarów (Schoenfeld i wsp. 2017),
  *   w redukcji utrzymujemy intensywność, żeby chronić masę mięśniową,
  * - kondycja: 8–15 powt., 2 serie (ACSM 2009, zalecenia zdrowotne).
+ * Tempo zapisujemy jak w planach trenera: ekscentryka–pauza–koncentryka–pauza (X = dynamicznie).
  * Liczba serii jest potem korygowana przez balanceVolume().
  */
 function scheme(params: PlanParams, ex: Exercise): Scheme {
   if (ex.pattern === 'cardio') {
     return params.goal === 'kondycja'
-      ? { sets: 1, reps: '15 min', rest: '—', notes: 'Interwały: 30 s mocno / 60–90 s spokojnie' }
-      : { sets: 1, reps: '15–20 min', rest: '—', notes: 'Umiarkowane tempo (da się mówić pełnymi zdaniami)' }
+      ? { sets: 1, reps: '15 min', rest: '—', notes: 'Interwały: 30 s mocno / 60–90 s spokojnie', tempo: '', rir: '' }
+      : { sets: 1, reps: '15–20 min', rest: '—', notes: 'Umiarkowane tempo (da się mówić pełnymi zdaniami)', tempo: '', rir: '' }
   }
   const timed = /plank|hollow|spacer/i.test(ex.name)
   if (ex.pattern === 'core') {
-    return { sets: 2, reps: timed ? '30–45 s' : '10–15', rest: '60 s', notes: '' }
+    return { sets: 2, reps: timed ? '30–45 s' : '10–15', rest: '60 s', notes: '', tempo: timed ? '' : '2101', rir: timed ? '' : '1' }
   }
   const compound = !!ex.compound
-  const table: Record<TrainingGoal, [Scheme, Scheme]> = {
+  type Base = Omit<Scheme, 'notes' | 'tempo'>
+  const table: Record<TrainingGoal, [Base, Base]> = {
     sila: [
-      { sets: 4, reps: '3–5', rest: '3 min', notes: 'RIR 1–3' },
-      { sets: 2, reps: '8–12', rest: '90 s', notes: 'RIR 1–2' },
+      { sets: 4, reps: '3–5', rest: '3 min', rir: '1–3' },
+      { sets: 2, reps: '8–12', rest: '90 s', rir: '1–2' },
     ],
     masa: [
-      { sets: 3, reps: '6–10', rest: '2–3 min', notes: 'RIR 1–3' },
-      { sets: 2, reps: '10–15', rest: '60–90 s', notes: 'RIR 0–2' },
+      { sets: 3, reps: '6–10', rest: '2–3 min', rir: '1–2' },
+      { sets: 2, reps: '10–15', rest: '60–90 s', rir: '0–1' },
     ],
     redukcja: [
-      { sets: 3, reps: '6–10', rest: '2 min', notes: 'RIR 1–3' },
-      { sets: 2, reps: '10–15', rest: '60–90 s', notes: 'RIR 0–2' },
+      { sets: 3, reps: '6–10', rest: '2 min', rir: '1–2' },
+      { sets: 2, reps: '10–15', rest: '60–90 s', rir: '0–1' },
     ],
     kondycja: [
-      { sets: 2, reps: '8–12', rest: '90 s', notes: 'RIR 2–3' },
-      { sets: 2, reps: '12–15', rest: '60 s', notes: '' },
+      { sets: 2, reps: '8–12', rest: '90 s', rir: '2–3' },
+      { sets: 2, reps: '12–15', rest: '60 s', rir: '1–2' },
     ],
   }
-  const s = { ...table[params.goal][compound ? 0 : 1] }
+  // Zawias biodrowy (RDL itp.) z wolniejszą ekscentryką, ciężkie boje siłowe – dynamiczna koncentryka
+  const tempo = ex.pattern === 'hinge' ? '3101' : params.goal === 'sila' && compound ? '21X1' : '2101'
+  const s: Scheme = { ...table[params.goal][compound ? 0 : 1], notes: '', tempo }
   if (params.level === 'poczatkujacy') {
     s.sets = Math.min(s.sets, 3)
     if (compound) {
       s.reps = params.goal === 'sila' ? '5–8' : '8–12'
-      s.notes = 'Technika przede wszystkim – RIR 2–3'
+      s.rir = '2–3'
+      s.notes = 'Technika przede wszystkim'
     }
   }
   return s
@@ -362,6 +369,7 @@ export function generatePlan(
     'Rozgrzewka: 5–10 min lekkiego cardio + 1–2 serie rozgrzewkowe przed pierwszym ćwiczeniem.',
     'Progresja: gdy we wszystkich seriach zrobisz górny zakres powtórzeń przy zadanym RIR, zwiększ ciężar o 2–10% (ACSM 2009).',
     'RIR: ile powtórzeń „zostaje w zapasie” do upadku mięśniowego.',
+    'Tempo: 4 cyfry = opuszczanie – pauza na dole – podnoszenie – pauza na górze (w sekundach, X = dynamicznie).',
     '',
     'Zasady (na podstawie badań):',
     '• Każda partia trenowana min. 2× w tygodniu (Schoenfeld i wsp., Sports Med 2016).',

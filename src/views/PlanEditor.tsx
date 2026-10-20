@@ -62,6 +62,8 @@ export function PlanEditor({ id }: { id: string }) {
       reps: '8-12',
       weight: '',
       rest: '90 s',
+      tempo: '2101',
+      rir: '1–2',
       notes: '',
     }
     setDay(dayId, (day) => ({ ...day, exercises: [...day.exercises, ex] }))
@@ -166,6 +168,8 @@ export function PlanEditor({ id }: { id: string }) {
                     <th>Serie</th>
                     <th>Powt.</th>
                     <th>Ciężar</th>
+                    <th>Tempo</th>
+                    <th>RIR</th>
                     <th>Przerwa</th>
                     <th>Uwagi</th>
                     <th></th>
@@ -209,6 +213,22 @@ export function PlanEditor({ id }: { id: string }) {
                           onChange={(e) => setExercise(day.id, ex.id, { weight: e.target.value })}
                         />
                       </td>
+                      <td data-label="Tempo">
+                        <input
+                          className="narrow"
+                          placeholder="2101"
+                          value={ex.tempo ?? ''}
+                          onChange={(e) => setExercise(day.id, ex.id, { tempo: e.target.value.toUpperCase() })}
+                        />
+                      </td>
+                      <td data-label="RIR">
+                        <input
+                          className="narrow"
+                          placeholder="1–2"
+                          value={ex.rir ?? ''}
+                          onChange={(e) => setExercise(day.id, ex.id, { rir: e.target.value })}
+                        />
+                      </td>
                       <td data-label="Przerwa">
                         <input
                           className="narrow"
@@ -218,7 +238,7 @@ export function PlanEditor({ id }: { id: string }) {
                       </td>
                       <td data-label="Uwagi">
                         <input
-                          placeholder="tempo, technika…"
+                          placeholder="technika, wskazówki…"
                           value={ex.notes}
                           onChange={(e) => setExercise(day.id, ex.id, { notes: e.target.value })}
                         />

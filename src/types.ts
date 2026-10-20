@@ -1,6 +1,21 @@
 export type Sex = 'M' | 'K'
 export type Goal = 'redukcja' | 'utrzymanie' | 'masa'
 
+/** Pomiar ciała z danego dnia – wszystkie pola poza datą są opcjonalne */
+export interface Measurement {
+  id: string
+  /** Data w formacie RRRR-MM-DD */
+  date: string
+  weight?: number
+  bodyFat?: number
+  waist?: number
+  hips?: number
+  chest?: number
+  arm?: number
+  thigh?: number
+  note?: string
+}
+
 export interface Client {
   id: string
   name: string
@@ -14,6 +29,7 @@ export interface Client {
   notes: string
   /** Makro ustawione przez trenera (zastępuje wyliczone ze wzoru) */
   target?: Macros
+  measurements?: Measurement[]
   createdAt: string
 }
 
@@ -92,6 +108,10 @@ export interface PlanExercise {
   /** Docelowy ciężar wpisany przez trenera */
   weight: string
   rest: string
+  /** Tempo, np. 2101 lub 21X1 (ekscentryka–pauza–koncentryka–pauza) */
+  tempo?: string
+  /** Powtórzenia w zapasie, np. „1–2” */
+  rir?: string
   notes: string
   log?: LogEntry[]
 }

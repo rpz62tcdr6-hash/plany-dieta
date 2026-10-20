@@ -21,8 +21,8 @@ import { NumberInput } from './NumberInput'
 type Mode = 'view' | 'workout' | 'edit'
 
 /** Plan na karcie podopiecznego: lista treningów, każdy rozwija się po kliknięciu */
-export function PlanPreview({ plan }: { plan: TrainingPlan }) {
-  const [open, setOpen] = useState<string | null>(null)
+export function PlanPreview({ plan, initialOpen }: { plan: TrainingPlan; initialOpen?: string }) {
+  const [open, setOpen] = useState<string | null>(initialOpen ?? null)
   return (
     <div className="plan-preview">
       {plan.days.map((day) => (
@@ -102,6 +102,8 @@ function DayAccordion({
 
 function scheme(pe: PlanExercise, cardio: boolean) {
   const parts = [cardio ? pe.reps : `${pe.sets} × ${pe.reps}`]
+  if (pe.tempo) parts.push(`tempo ${pe.tempo}`)
+  if (pe.rir) parts.push(`RIR ${pe.rir}`)
   if (pe.rest && pe.rest !== '—') parts.push(`przerwa ${pe.rest}`)
   if (pe.notes) parts.push(pe.notes)
   if (pe.weight) parts.push(`cel: ${pe.weight}`)
@@ -475,6 +477,18 @@ function DayEdit({ plan, day, onDone }: { plan: TrainingPlan; day: PlanDay; onDo
               <input value={pe.reps} onChange={(e) => setEx(pe.id, { reps: e.target.value })} />
             </label>
             <label>
+              Tempo
+              <input
+                placeholder="2101"
+                value={pe.tempo ?? ''}
+                onChange={(e) => setEx(pe.id, { tempo: e.target.value.toUpperCase() })}
+              />
+            </label>
+            <label>
+              RIR
+              <input placeholder="1–2" value={pe.rir ?? ''} onChange={(e) => setEx(pe.id, { rir: e.target.value })} />
+            </label>
+            <label>
               Przerwa
               <input value={pe.rest} onChange={(e) => setEx(pe.id, { rest: e.target.value })} />
             </label>
@@ -527,6 +541,8 @@ function DayEdit({ plan, day, onDone }: { plan: TrainingPlan; day: PlanDay; onDo
                   reps: '8–12',
                   weight: '',
                   rest: '90 s',
+                  tempo: '2101',
+                  rir: '1–2',
                   notes: '',
                 },
               ],

@@ -64,3 +64,24 @@ export function topSet(sets: SetEntry[]): SetEntry | null {
 export function sessionTonnage(s: WorkoutSession): number {
   return s.exercises.reduce((sum, e) => sum + e.sets.reduce((a, x) => a + (x.weight ?? 0) * (x.reps ?? 0), 0), 0)
 }
+
+/** Poniedziałek bieżącego tygodnia (RRRR-MM-DD) */
+export function weekStart(): string {
+  const d = new Date(today())
+  const day = (d.getDay() + 6) % 7
+  d.setDate(d.getDate() - day)
+  return d.toISOString().slice(0, 10)
+}
+
+/** Wszystkie zapisane treningi z planów, od najnowszego */
+export function allSessions(plans: TrainingPlan[]) {
+  return plans
+    .flatMap((p) => (p.sessions ?? []).map((s) => ({ plan: p, session: s, day: p.days.find((d) => d.id === s.dayId) })))
+    .sort((a, b) => b.session.date.localeCompare(a.session.date))
+}
+
+/** Trening, który najdawniej (albo jeszcze nigdy) nie był robiony – propozycja „na dziś” */
+export function nextDay(plan: TrainingPlan) {
+  const last = (dayId: string) => sortedSessions(plan).find((s) => s.dayId === dayId)?.date ?? ''
+  return [...plan.days].filter((d) => d.exercises.length > 0).sort((a, b) => last(a.id).localeCompare(last(b.id)))[0]
+}

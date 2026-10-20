@@ -4,6 +4,8 @@ Aplikacja dla trenera personalnego do tworzenia **planów treningowych** i **die
 
 ## Co potrafi
 
+- **Profil podopiecznego** – zakładki Przegląd / Trening / Dieta / Pomiary / Dane: aktywność, ostatnie
+  treningi, waga i obwody z wykresem, szybkie „Zapisz trening”.
 - **Podopieczni** – dane (płeć, wiek, wzrost, waga, aktywność, cel, notatki) i automatyczne
   wyliczenie zapotrzebowania kalorycznego (BMR, TDEE, cel kcal, proponowane makro).
 - **Generator planów treningowych** – wpisujesz założenia (cel, poziom, dni w tygodniu, czas, sprzęt,
@@ -11,7 +13,7 @@ Aplikacja dla trenera personalnego do tworzenia **planów treningowych** i **die
   i przerwami. Każde ćwiczenie podmienisz jednym kliknięciem (⇄) na podobne.
 - **Generator diet** – wpisujesz kcal i makro, liczbę posiłków i preferencje (wege, bez laktozy, bez glutenu),
   a aplikacja dobiera przepisy i przelicza gramatury tak, żeby trafić w cel.
-- **Przepisy** – baza 92 przepisów (w tym fit przepisy w stylu TikToka) + własne przepisy z linkiem do wideo.
+- **Przepisy** – baza 149 przepisów (w tym fit przepisy w stylu TikToka) + własne przepisy z linkiem do wideo.
 - **PDF** – czytelny wydruk planu i diety do wysłania podopiecznemu („Podgląd / PDF” → „Zapisz jako PDF”).
 - **Biblioteka** – własne ćwiczenia i produkty (wartości na 100 g).
 - **Kopia zapasowa** – eksport / import wszystkich danych do pliku.

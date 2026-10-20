@@ -469,12 +469,13 @@ details.fold[open] > summary { padding-bottom: 0.9rem; margin-bottom: 0.9rem; bo
 .edit-ex { border-top: 1px solid var(--border); padding: 0.75rem 0; }
 .edit-ex-top { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
 .edit-ex-top .swap { padding: 0.4rem 0.7rem; font-size: 1.05rem; }
-.edit-ex-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) 2fr; gap: 0.5rem; }
+.edit-ex-fields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; }
+.edit-ex-fields .wide-field { grid-column: 1 / -1; }
 .edit-ex-actions { display: flex; gap: 0.4rem; justify-content: flex-end; margin-top: 0.5rem; }
 .day-edit > label.block { margin-bottom: 0.5rem; }
 
 @media (max-width: 700px) {
-  .edit-ex-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .edit-ex-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .edit-ex-fields .wide-field { grid-column: 1 / -1; }
   .set-field { flex: 1 1 0; }
   .set-prev { display: none; }
@@ -547,3 +548,104 @@ details.fold[open] > summary { padding-bottom: 0.9rem; margin-bottom: 0.9rem; bo
   .print-table { font-size: 0.8rem; }
   .info-table th { width: 38%; }
 }
+
+/* ——— Profil podopiecznego: nagłówek, zakładki, przegląd ——— */
+.hero-main { display: flex; align-items: center; gap: 1rem; }
+.hero-sub { margin: 0.25rem 0 0; color: #bdbdbd; font-size: 0.9rem; }
+.avatar {
+  flex: none; display: inline-grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%;
+  background: var(--black); color: #fff; font-weight: 900; font-size: 0.95rem; letter-spacing: 0.02em;
+  box-shadow: inset 0 -3px 0 var(--red);
+}
+.avatar.big { width: 4rem; height: 4rem; font-size: 1.4rem; background: var(--red); box-shadow: none; }
+
+.tabbar {
+  position: sticky; top: 61px; z-index: 8; display: flex; gap: 0.25rem; overflow-x: auto; scrollbar-width: none;
+  background: var(--bg); padding: 0.4rem 0; margin: -0.75rem 0 1rem; border-bottom: 2px solid var(--border);
+}
+.tabbar::-webkit-scrollbar { display: none; }
+.tabbar button {
+  flex: none; border: none; border-radius: 999px; background: transparent; font-weight: 800; color: var(--muted);
+  padding: 0.55rem 1rem; position: relative;
+}
+.tabbar button:hover { background: #e9e9e9; color: var(--text); border: none; }
+.tabbar button.active { background: var(--black); color: #fff; }
+.tabbar .dot { position: absolute; top: 0.4rem; right: 0.45rem; width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+.kpi {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.85rem 1rem;
+  border-top: 4px solid var(--black); display: flex; flex-direction: column; gap: 0.15rem; min-width: 0;
+}
+.kpi span { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.kpi strong { font-size: 1.6rem; font-weight: 900; line-height: 1.15; }
+.kpi strong small { font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+.kpi em { font-style: normal; font-size: 0.8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 800px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.quick-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.quick-actions .big { flex: 1 1 260px; }
+.overview-title { margin: 0 0 0.25rem; font-weight: 800; font-size: 1.05rem; }
+.day-list, .meal-list, .recent { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.day-link {
+  width: 100%; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; text-align: left;
+  border: none; border-top: 1px solid var(--border); border-radius: 0; padding: 0.6rem 0.2rem; background: none; white-space: normal;
+}
+.day-link:hover { background: #fafafa; border-color: var(--border); }
+.day-link .arrow { grid-row: 1 / 3; grid-column: 2; align-self: center; color: var(--red); font-size: 1.4rem; font-weight: 900; }
+.meal-list li { display: flex; justify-content: space-between; gap: 0.75rem; padding: 0.4rem 0; border-top: 1px solid var(--border); font-size: 0.92rem; }
+.meal-list li span:last-child { text-align: right; font-weight: 600; }
+.mini-macros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; margin: 0.5rem 0; }
+.mini-macros div { background: var(--black); color: #fff; border-radius: 10px; padding: 0.45rem 0.6rem; }
+.mini-macros span { display: block; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: #bdbdbd; }
+.mini-macros strong { font-size: 1.1rem; font-weight: 900; }
+.recent li { display: flex; gap: 0.8rem; align-items: center; padding: 0.55rem 0; border-top: 1px solid var(--border); }
+.recent-date { display: flex; flex-direction: column; align-items: center; min-width: 3.6rem; background: var(--bg); border-radius: 10px; padding: 0.3rem 0.4rem; }
+.recent-date small { font-size: 0.68rem; color: var(--muted); }
+.recent-main { display: flex; flex-direction: column; min-width: 0; }
+
+/* Lista podopiecznych */
+.client-card { gap: 0.6rem; }
+.client-card-top { display: flex; gap: 0.75rem; align-items: center; }
+.client-card-top > div { display: flex; flex-direction: column; min-width: 0; }
+.client-card-stats { display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; font-size: 0.82rem; color: var(--muted); }
+.client-card-stats b { color: var(--text); }
+.client-card-tags { display: flex; gap: 0.3rem; }
+
+/* Pomiary */
+.measure-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.6rem; margin-bottom: 0.75rem; }
+.measure-field { position: relative; }
+.measure-field input { font-size: 1.15rem; font-weight: 800; padding-right: 2.4rem; }
+.measure-field small { position: absolute; right: 0.6rem; bottom: 0.7rem; color: var(--muted); font-weight: 600; }
+.measure-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.measure-table th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 0.4rem; }
+.measure-table td { padding: 0.5rem 0.4rem; border-top: 1px solid var(--border); white-space: nowrap; }
+.measure-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.delta { display: block; font-size: 0.72rem; font-weight: 700; }
+.delta.up { color: var(--text); }
+.delta.down { color: var(--red); }
+
+/* Wykres */
+.chart { position: relative; width: 100%; touch-action: pan-y; }
+.chart svg { display: block; overflow: visible; }
+.chart-grid { stroke: #ececec; stroke-width: 1; }
+.chart-axis { font-size: 11px; fill: var(--muted); font-family: inherit; }
+.chart-line { fill: none; stroke: var(--black); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart-dot { fill: var(--black); stroke: #fff; stroke-width: 2; }
+.chart-dot.last { fill: var(--red); }
+.chart-cross { stroke: #bdbdbd; stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-tip {
+  position: absolute; pointer-events: none; width: 120px; background: var(--black); color: #fff; border-radius: 8px;
+  padding: 0.35rem 0.55rem; display: flex; flex-direction: column; font-size: 0.8rem; border-bottom: 3px solid var(--red);
+}
+.chart-tip strong { font-size: 1rem; }
+
+@media (max-width: 600px) {
+  .hero-main { gap: 0.75rem; }
+  .avatar.big { width: 3.2rem; height: 3.2rem; font-size: 1.1rem; }
+  .tabbar { top: 88px; }
+  .kpi strong { font-size: 1.35rem; }
+  .quick-actions > * { flex: 1 1 45%; }
+}
+.two-col > * { min-width: 0; }
+.chart { overflow: hidden; }

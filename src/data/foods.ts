@@ -122,6 +122,27 @@ const list: [string, number, number, number, number, string][] = [
   ['Wiórki kokosowe', 660, 6.9, 7, 64, ''],
   ['Napój migdałowy niesłodzony', 13, 0.4, 0.1, 1.1, ''],
   ['Syrop klonowy', 260, 0, 67, 0.1, ''],
+  // — od wersji 7 —
+  ['Kapusta biała', 33, 1.3, 7, 0.2, ''],
+  ['Kapusta kiszona', 18, 1.1, 3.4, 0.2, ''],
+  ['Buraki', 43, 1.6, 10, 0.2, ''],
+  ['Dynia', 26, 1, 6.5, 0.1, ''],
+  ['Szparagi', 20, 2.2, 3.9, 0.1, ''],
+  ['Brukselka', 43, 3.4, 9, 0.3, ''],
+  ['Kasza pęczak (sucha)', 340, 10, 72, 2, 'g'],
+  ['Gnocchi', 165, 3.5, 33, 1.5, 'g'],
+  ['Chlebek pita pełnoziarnisty', 260, 9, 50, 2.5, 'g'],
+  ['Kiełbasa drobiowa', 160, 15, 2, 10, 'm'],
+  ['Olej rzepakowy', 884, 0, 0, 100, ''],
+  ['Granola bez dodatku cukru', 450, 10, 55, 20, 'g'],
+  ['Ser gouda light', 280, 30, 0, 17, 'l'],
+  ['Śmietana 12%', 133, 2.7, 3.6, 12, 'l'],
+  ['Pstrąg (surowy)', 119, 20, 0, 4, 'm'],
+  ['Ricotta', 150, 9, 4, 11, 'l'],
+  ['Jogurt naturalny 0%', 40, 5, 5, 0, 'l'],
+  ['Płatki gryczane', 350, 12, 70, 3, ''],
+  ['Kurczak – filet z piersi wędzony', 105, 21, 1, 2, 'm'],
+  ['Mleko 0,5%', 39, 3.4, 4.9, 0.5, 'l'],
 ]
 
 export const defaultFoods: Food[] = list.map(([name, kcal, protein, carbs, fat, flags], i) => ({

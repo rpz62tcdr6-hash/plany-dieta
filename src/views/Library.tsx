@@ -31,6 +31,12 @@ function Exercises() {
   const [muscle, setMuscle] = useState(MUSCLE_GROUPS[0])
   const [pattern, setPattern] = useState<Pattern | ''>('')
   const [equipment, setEquipment] = useState<Equipment>('hantle')
+  const [query, setQuery] = useState('')
+  const [eqFilter, setEqFilter] = useState<Equipment | ''>('')
+  const q = query.trim().toLowerCase()
+  const visible = data.exercises.filter(
+    (e) => (!q || e.name.toLowerCase().includes(q)) && (!eqFilter || e.equipment === eqFilter),
+  )
 
   function add() {
     if (!name.trim()) return
@@ -88,12 +94,34 @@ function Exercises() {
         </form>
       </section>
 
+      <div className="filters">
+        <input
+          className="search"
+          placeholder={`Szukaj wśród ${data.exercises.length} ćwiczeń…`}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <div className="chips compact">
+          <button className={`chip ${eqFilter === '' ? 'on' : ''}`} onClick={() => setEqFilter('')}>
+            Wszystkie
+          </button>
+          {EQUIPMENT.map((eq) => (
+            <button key={eq} className={`chip ${eqFilter === eq ? 'on' : ''}`} onClick={() => setEqFilter(eq)}>
+              {eq}
+            </button>
+          ))}
+        </div>
+      </div>
+      {visible.length === 0 && <p className="empty">Brak ćwiczeń spełniających kryteria.</p>}
+
       {MUSCLE_GROUPS.map((g) => {
-        const items = data.exercises.filter((e) => e.muscle === g).sort((a, b) => a.name.localeCompare(b.name, 'pl'))
+        const items = visible.filter((e) => e.muscle === g).sort((a, b) => a.name.localeCompare(b.name, 'pl'))
         if (items.length === 0) return null
         return (
           <section className="card" key={g}>
-            <h2>{g}</h2>
+            <h2>
+              {g} <span className="muted small">({items.length})</span>
+            </h2>
             <ul className="list">
               {items.map((e) => (
                 <li key={e.id}>

@@ -54,6 +54,8 @@ export function PrintPlan({ id }: { id: string }) {
                   <th>Ćwiczenie</th>
                   <th>Serie</th>
                   <th>Powtórzenia</th>
+                  <th>Tempo</th>
+                  <th>RIR</th>
                   <th>Ciężar</th>
                   {hasLog && <th>Ostatnio</th>}
                   <th>Przerwa</th>
@@ -69,6 +71,8 @@ export function PrintPlan({ id }: { id: string }) {
                     <td className="ex-name">{exName(ex.exerciseId)}</td>
                     <td className="strong">{ex.sets}</td>
                     <td className="strong">{ex.reps}</td>
+                    <td>{ex.tempo}</td>
+                    <td className="strong">{ex.rir}</td>
                     <td>{ex.weight}</td>
                     {hasLog && <td>{lastLog(ex)}</td>}
                     <td>{ex.rest}</td>

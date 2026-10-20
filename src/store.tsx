@@ -7,7 +7,7 @@ import type { AppData, Diet, TrainingPlan, WorkoutSession } from './types'
 
 const STORAGE_KEY = 'apka-plany-dieta:v1'
 /** Podbij, gdy dochodzą nowe wbudowane ćwiczenia/produkty/przepisy */
-const SEED_VERSION = 6
+const SEED_VERSION = 7
 
 export function emptyData(): AppData {
   return {
@@ -58,7 +58,7 @@ function migrate(raw: Partial<AppData>): AppData {
     return { ...rest, target }
   })
 
-  data.plans = data.plans.map(migrateLegacyLog).map((p) => ({ ...p, notes: p.notes.replace('RIR = ile', 'RIR: ile') }))
+  data.plans = data.plans.map(migrateLegacyLog).map(migrateRir).map((p) => ({ ...p, notes: p.notes.replace('RIR = ile', 'RIR: ile') }))
   data.diets = data.diets.map((d) => ({ ...d, notes: d.notes.replace('Białko rozkładaj równomiernie', 'Białko: rozkładaj równomiernie') }))
 
   data.seedVersion = SEED_VERSION
@@ -91,6 +91,22 @@ function migrateLegacyLog(plan: TrainingPlan): TrainingPlan {
     }),
   }))
   return { ...plan, days, sessions }
+}
+
+/** „RIR 1–2” zapisane wcześniej w uwagach przenosimy do osobnej kolumny RIR */
+function migrateRir(plan: TrainingPlan): TrainingPlan {
+  const re = /(?:^|\s*[–-]\s*)RIR\s*([\d–-]+)\s*$/
+  return {
+    ...plan,
+    days: plan.days.map((d) => ({
+      ...d,
+      exercises: d.exercises.map((e) => {
+        if (e.rir !== undefined) return e
+        const m = e.notes.match(re)
+        return m ? { ...e, rir: m[1], notes: e.notes.replace(re, '').trim() } : e
+      }),
+    })),
+  }
 }
 
 function load(): AppData {
