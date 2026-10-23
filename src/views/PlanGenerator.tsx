@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { hasApiKey } from '../ai/key'
+import { AiPrompt } from '../components/AiPrompt'
 import { ChoiceChips, MultiChips } from '../components/Chips'
 import {
   EQUIPMENT_SET_LABELS,
@@ -20,6 +22,7 @@ const fromClientGoal: Record<Goal, TrainingGoal> = { redukcja: 'redukcja', utrzy
 
 export function PlanGenerator({ clientId }: { clientId: string }) {
   const { data, update } = useStore()
+  const [mode, setMode] = useState<'ai' | 'form'>(hasApiKey() ? 'ai' : 'form')
   const client = data.clients.find((c) => c.id === clientId)
   const [params, setParams] = useState<PlanParams>({
     goal: client ? fromClientGoal[client.goal] : 'masa',
@@ -58,9 +61,59 @@ export function PlanGenerator({ clientId }: { clientId: string }) {
       <div className="page-head">
         <div>
           <p className="eyebrow">Nowy plan treningowy</p>
-          <h1>Założenia planu</h1>
+          <h1>{mode === 'ai' ? 'Opisz plan słowami' : 'Założenia planu'}</h1>
         </div>
       </div>
+
+      <div className="tabs">
+        <button className={mode === 'ai' ? 'active' : ''} onClick={() => setMode('ai')}>
+          ✨ Asystent AI
+        </button>
+        <button className={mode === 'form' ? 'active' : ''} onClick={() => setMode('form')}>
+          ⚡ Kreator z kafelkami
+        </button>
+      </div>
+
+      {mode === 'ai' ? (
+        <section className="card">
+          <h2>Czego potrzebujesz?</h2>
+          <p className="muted small">
+            Napisz jak do asystenta – cel, ile dni, ile czasu, sprzęt, kontuzje, ulubione ćwiczenia, styl. AI zna dane
+            podopiecznego ({client.name}), jego notatki i ostatnie wyniki. Gotowy plan otworzy się w edytorze – możesz go
+            poprawić ręcznie albo kolejnym poleceniem.
+          </p>
+          <AiPrompt
+            placeholder={`np. Plan na 4 dni (pon, wt, czw, pt) po 75 minut, budowa masy, głównie wolne ciężary.\nPriorytet: plecy i barki. Boli lewe kolano – bez głębokich przysiadów.\nChcę serię łączoną na koniec dnia z ramionami.`}
+            examples={[
+              '4 dni, góra/dół, 75 min',
+              'głównie wolne ciężary',
+              'priorytet pośladki',
+              'bez skoków i głębokich przysiadów',
+              'dodaj serie łączone na ramiona',
+              'dni nazwij dniami tygodnia',
+            ]}
+            buttonLabel="✨ Ułóż plan z AI"
+            run={async (prompt, signal) => {
+              const { applyAiPlan, generatePlanWithAi } = await import('../ai/plan')
+              const result = await generatePlanWithAi(prompt, client, data, signal)
+              const { days, newExercises } = applyAiPlan(result, data.exercises)
+              const plan: TrainingPlan = {
+                id: newId(),
+                clientId,
+                name: result.name,
+                notes: [result.notes, result.summary ? `\nUwagi AI: ${result.summary}` : ''].join(''),
+                days,
+                goal: params.goal,
+                level: params.level,
+                createdAt: new Date().toISOString(),
+              }
+              update((d) => ({ ...d, exercises: [...d.exercises, ...newExercises], plans: [...d.plans, plan] }))
+              navigate({ name: 'plan', id: plan.id })
+            }}
+          />
+        </section>
+      ) : (
+      <>
 
       <section className="card step">
         <h2>
@@ -183,6 +236,8 @@ export function PlanGenerator({ clientId }: { clientId: string }) {
           ⚡ Wygeneruj plan
         </button>
       </div>
+      </>
+      )}
     </div>
   )
 }

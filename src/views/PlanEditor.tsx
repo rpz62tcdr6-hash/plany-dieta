@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { AiPrompt } from '../components/AiPrompt'
 import { ExerciseSelect } from '../components/ExerciseSelect'
 import { GOAL_LABELS, LEVEL_LABELS, swapExercise } from '../generators/plan'
 import { estimateMinutes } from '../generators/volume'
@@ -9,6 +11,8 @@ import type { Level, PlanDay, PlanExercise, TrainingGoal, TrainingPlan } from '.
 
 export function PlanEditor({ id }: { id: string }) {
   const { data, update } = useStore()
+  const [undo, setUndo] = useState<{ plan: TrainingPlan; summary: string } | null>(null)
+  const [showAi, setShowAi] = useState(false)
   const plan = data.plans.find((p) => p.id === id)
 
   if (!plan) {
@@ -85,6 +89,65 @@ export function PlanEditor({ id }: { id: string }) {
           Podgląd / PDF
         </a>
       </div>
+
+      <section className="card ai-card">
+        <div className="section-head">
+          <h2>✨ Popraw z AI</h2>
+          <button className="small-btn" onClick={() => setShowAi((v) => !v)}>
+            {showAi ? 'Zwiń' : 'Rozwiń'}
+          </button>
+        </div>
+        {undo && (
+          <div className="ai-result">
+            <p>
+              <b>AI zmieniło plan.</b> {undo.summary}
+            </p>
+            <div className="actions">
+              <button
+                onClick={() => {
+                  const previous = undo.plan
+                  update((d) => ({ ...d, plans: d.plans.map((p) => (p.id === id ? previous : p)) }))
+                  setUndo(null)
+                }}
+              >
+                ↺ Cofnij zmiany AI
+              </button>
+              <button className="small-btn" onClick={() => setUndo(null)}>
+                OK, zostaw
+              </button>
+            </div>
+          </div>
+        )}
+        {showAi && (
+          <AiPrompt
+            placeholder="np. Zamień przysiady na coś łagodniejszego dla kolan, dodaj 2 serie na tylny akton barków w każdy dzień i skróć trening do 60 minut."
+            examples={[
+              'skróć każdy trening do 60 min',
+              'zamień maszyny na wolne ciężary',
+              'dodaj więcej pracy na pośladki',
+              'oszczędzaj kolana',
+              'zwiększ objętość na plecy',
+              'dopisz wskazówki techniczne',
+            ]}
+            buttonLabel="✨ Popraw plan"
+            run={async (instruction, signal) => {
+              const before = structuredClone(plan)
+              const { applyAiPlan, refinePlanWithAi } = await import('../ai/plan')
+              const result = await refinePlanWithAi(instruction, plan, client, data, signal)
+              const { days, newExercises } = applyAiPlan(result, data.exercises, plan.days)
+              update((d) => ({
+                ...d,
+                exercises: [...d.exercises, ...newExercises],
+                plans: d.plans.map((p) => (p.id === id ? { ...p, name: result.name || p.name, notes: result.notes || p.notes, days } : p)),
+              }))
+              setUndo({ plan: before, summary: result.summary })
+            }}
+          />
+        )}
+        {!showAi && !undo && (
+          <p className="muted small">Napisz poleceniem, co zmienić w planie – AI poprawi tylko to, o co prosisz. Historia treningów zostaje.</p>
+        )}
+      </section>
 
       <section className="card">
         <label className="block">

@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { AiSettings } from '../components/AiSettings'
 import { isAppData, useStore } from '../store'
 
 export function Backup() {
@@ -31,8 +32,10 @@ export function Backup() {
   return (
     <div>
       <div className="page-head">
-        <h1>Kopia zapasowa</h1>
+        <h1>Ustawienia</h1>
       </div>
+      <AiSettings />
+      <h2 className="section-heading">Kopia zapasowa</h2>
       <section className="card">
         <p>
           Wszystkie dane są zapisywane <strong>tylko w tej przeglądarce</strong> na tym urządzeniu. Jeśli wyczyścisz

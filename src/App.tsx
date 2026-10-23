@@ -45,7 +45,7 @@ const NAV = [
   { section: 'clients', label: 'Podopieczni', route: { name: 'clients' } },
   { section: 'recipes', label: 'Przepisy', route: { name: 'recipes' } },
   { section: 'library', label: 'Biblioteka', route: { name: 'library' } },
-  { section: 'backup', label: 'Kopia', route: { name: 'backup' } },
+  { section: 'backup', label: 'Ustawienia', route: { name: 'backup' } },
 ] as const
 
 function sectionOf(route: Route): string {
